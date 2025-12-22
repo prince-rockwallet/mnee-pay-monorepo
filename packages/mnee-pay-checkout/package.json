@@ -15,7 +15,7 @@
       "import": "./dist/mnee-checkout.es.js",
       "require": "./dist/mnee-checkout.cjs.js"
     },
-    "./styles.css": "./dist/style.css"
+    "./styles.css": "./dist/checkout.css"
   },
   "scripts": {
     "dev": "vite build --watch",

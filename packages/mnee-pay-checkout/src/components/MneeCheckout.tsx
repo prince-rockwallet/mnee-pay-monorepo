@@ -21,7 +21,7 @@ import { MneeCheckoutProps, CheckoutType, CustomField } from '../types';
 import { fetchButtonConfig, ButtonConfig } from '../lib/api';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../lib/utils';
-import { Toaster, toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletSelectionModal } from './WalletSelectionModel';
@@ -449,6 +449,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
                 allowCustomAmount: buttonConfig.allowCustomAmount,
                 minAmount: buttonConfig.minAmountCents ? buttonConfig.minAmountCents / 100 : undefined,
                 maxAmount: buttonConfig.maxAmountCents ? buttonConfig.maxAmountCents / 100 : undefined,
+                buttonText: buttonConfig.buttonText
               }}
               product={product}
               customFields={customFields}
@@ -538,8 +539,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
         styling={resolvedStyling}
         onWalletDisconnect={onWalletDisconnect}
       />
-
-      <Toaster position="top-center" richColors />
 
       {/* Floating Cart Button - only when cart is enabled */}
       {buttonConfig?.enableCart && (
@@ -637,6 +636,7 @@ export function MneeSharedProviders({ children }: { children: React.ReactNode })
             <WalletProvider>
               <CartProvider>
                   {children}
+                  <Toaster position='top-center' richColors />
               </CartProvider>
             </WalletProvider>
           </YoursProvider>

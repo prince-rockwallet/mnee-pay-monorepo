@@ -5,7 +5,6 @@ module.exports = {
     './index.html',
     './src/**/*.{ts,tsx,js,jsx}',
   ],
-  prefix: "mnee-",
   theme: {
     container: {
       center: true,

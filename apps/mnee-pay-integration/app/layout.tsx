@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import "@mnee-pay/checkout/styles.css";
 
 export const metadata: Metadata = {
   title: "MNEE Pay Testbench",
@@ -17,7 +18,7 @@ export default function RootLayout({
       <body
         className={`antialiased h-full flex flex-col bg-linear-to-b from-amber-50 via-orange-50 to-yellow-50 text-neutral-900`}
       >
-        <nav className="bg-amber-200 shadow-md border-b border-amber-300 sticky top-0 z-50">
+        <nav className="bg-amber-200 shadow-md border-b border-amber-300 sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
               <div className="flex items-center gap-8">

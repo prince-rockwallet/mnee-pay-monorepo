@@ -51,10 +51,10 @@
 
 @layer base {
   * {
-    @apply mnee-border-border;
+    @apply border-border;
   }
   body {
-    @apply mnee-bg-background mnee-text-foreground;
+    @apply bg-background text-foreground;
   }
 
   /* Custom button styling support */
