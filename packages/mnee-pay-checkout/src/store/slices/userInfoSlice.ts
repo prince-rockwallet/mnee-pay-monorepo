@@ -25,66 +25,33 @@ const initialUserInfo: UserInfo = {
   },
 };
 
-export const createUserSlice: StateCreator<UserSlice> = (set) => ({
+export const createUserSlice: StateCreator<UserSlice, [["zustand/immer", never]]> = (set) => ({
   user: {
     userInfo: initialUserInfo,
 
     setEmail: (email) =>
-      set((state) => ({
-        user: {
-          ...state.user,
-          userInfo: {
-            ...state.user.userInfo,
-            contact: {
-              ...state.user.userInfo.contact,
-              email,
-            },
-          },
-        },
-      })),
+      set((state) => {
+        state.user.userInfo.contact.email = email;
+      }),
 
     setPhone: (phone) =>
-      set((state) => ({
-        user: {
-          ...state.user,
-          userInfo: {
-            ...state.user.userInfo,
-            contact: {
-              ...state.user.userInfo.contact,
-              phone,
-            },
-          },
-        },
-      })),
+      set((state) => {
+        state.user.userInfo.contact.phone = phone;
+      }),
 
     setShipping: (shipping) =>
-      set((state) => ({
-        user: {
-          ...state.user,
-          userInfo: {
-            ...state.user.userInfo,
-            shipping,
-          },
-        },
-      })),
+      set((state) => {
+        state.user.userInfo.shipping = shipping;
+      }),
 
     setContact: (contact) =>
-      set((state) => ({
-        user: {
-          ...state.user,
-          userInfo: {
-            ...state.user.userInfo,
-            contact,
-          },
-        },
-      })),
+      set((state) => {
+        state.user.userInfo.contact = contact;
+      }),
 
     clearUserInfo: () =>
-      set((state) => ({
-        user: {
-          ...state.user,
-          userInfo: initialUserInfo,
-        },
-      })),
+      set((state) => {
+        state.user.userInfo = initialUserInfo;
+      }),
   },
 });

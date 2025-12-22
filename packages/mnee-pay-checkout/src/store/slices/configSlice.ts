@@ -29,43 +29,43 @@ const initialConfigState: ConfigState = {
   apiBaseUrl: '',
 };
 
-export const createConfigSlice: StateCreator<ConfigSlice> = (set, get) => ({
+export const createConfigSlice: StateCreator<ConfigSlice, [["zustand/immer", never]]> = (set, get) => ({
   config: {
     ...initialConfigState,
 
     setTheme: (theme) => {
-      set((state) => ({
-        config: { ...state.config, theme },
-      }));
+      set((state) => {
+        state.config.theme = theme;
+      });
       get().config.updateResolvedTheme();
     },
 
     updateResolvedTheme: () => {
       const { theme } = get().config;
+      let resolved: 'light' | 'dark' = 'light';
+
       if (theme === 'auto') {
-        const isDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        set((state) => ({
-          config: { ...state.config, resolvedTheme: isDark ? 'dark' : 'light' },
-        }));
+        resolved = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches 
+          ? 'dark' 
+          : 'light';
       } else {
-        set((state) => ({
-          config: { ...state.config, resolvedTheme: theme as 'light' | 'dark' },
-        }));
+        resolved = theme as 'light' | 'dark';
       }
+
+      set((state) => {
+        state.config.resolvedTheme = resolved;
+      });
     },
 
     initializeConfig: async (props) => {
       const { buttonId, apiBaseUrl = '', config: configOverride, theme = 'light', showConfetti, styling } = props;
 
-      set((state) => ({
-        config: { 
-          ...state.config, 
-          isLoading: true, 
-          error: null, 
-          apiBaseUrl, 
-          theme
-        },
-      }));
+      set((state) => {
+        state.config.isLoading = true;
+        state.config.error = null;
+        state.config.apiBaseUrl = apiBaseUrl;
+        state.config.theme = theme;
+      });
 
       get().config.updateResolvedTheme();
 
@@ -86,31 +86,37 @@ export const createConfigSlice: StateCreator<ConfigSlice> = (set, get) => ({
           customCSS: styling?.customCSS,
         } as ButtonConfig;
 
-        set((state) => ({
-          config: { ...state.config, buttonConfig: mockConfig, isLoading: false },
-        }));
+        set((state) => {
+          state.config.buttonConfig = mockConfig;
+          state.config.isLoading = false;
+        });
         return;
       }
 
       if (!buttonId) {
-        set((state) => ({
-          config: { ...state.config, error: 'Button ID or configuration is required', isLoading: false },
-        }));
+        set((state) => {
+          state.config.error = 'Button ID or configuration is required';
+          state.config.isLoading = false;
+        });
         return;
       }
 
       try {
         const config = await fetchButtonConfig(apiBaseUrl, buttonId);
-        set((state) => ({
-          config: { ...state.config, buttonConfig: config, isLoading: false },
-        }));
+        set((state) => {
+          state.config.buttonConfig = config;
+          state.config.isLoading = false;
+        });
       } catch (err: any) {
-        set((state) => ({
-          config: { ...state.config, error: err.message || 'Failed to load configuration', isLoading: false },
-        }));
+        set((state) => {
+          state.config.error = err.message || 'Failed to load configuration';
+          state.config.isLoading = false;
+        });
       }
     },
 
-    resetConfig: () => set((state) => ({ config: { ...state.config, ...initialConfigState } })),
+    resetConfig: () => set((state) => {
+      state.config = { ...state.config, ...initialConfigState };
+    }),
   },
 });
