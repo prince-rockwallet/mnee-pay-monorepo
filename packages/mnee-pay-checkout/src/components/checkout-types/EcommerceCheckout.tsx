@@ -275,7 +275,7 @@ export function EcommerceCheckout({
               value={quantity}
               onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
               onFocus={(e) => e.target.blur()}
-              className="w-20 text-center"
+              className="w-20 text-center no-spinner"
               min="1"
             />
             <Button

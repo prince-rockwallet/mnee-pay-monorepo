@@ -244,7 +244,7 @@ export function DonationCheckout({
                 min={config?.minAmount || 0.01}
                 max={config?.maxAmount}
                 step="0.01"
-                className={isCustom ? 'border-primary' : ''}
+                className={isCustom ? 'border-primary no-spinner' : 'no-spinner'}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                 {'USD'}

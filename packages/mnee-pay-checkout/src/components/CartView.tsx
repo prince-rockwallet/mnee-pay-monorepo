@@ -279,7 +279,7 @@ export function CartView({
                     value={item.quantity}
                     onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
                     onFocus={(e) => e.target.blur()}
-                    className="w-14 h-7 text-center text-sm"
+                    className="w-14 h-7 text-center text-sm no-spinner"
                     min="1"
                   />
                   <Button
