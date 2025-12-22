@@ -18,14 +18,13 @@ import { CartView } from './CartView';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from './ui/sheet';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 import { MneeCheckoutProps, CheckoutType, CustomField } from '../types';
-import { fetchButtonConfig, ButtonConfig } from '../lib/api';
-import { useTheme } from '../hooks/useTheme';
 import { cn } from '../lib/utils';
 import { toast, Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletSelectionModal } from './WalletSelectionModel';
 import { WalletStatusBadge } from './WalletStatusBadge';
+import { useConfig, useStore } from '../store';
 
 // Create a singleton QueryClient instance
 const queryClient = new QueryClient();
@@ -34,9 +33,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
   const {
     buttonId,
     apiBaseUrl,
-    config: configOverride,
     previewMode = false,
-    theme = 'light',
     styling,
     triggerMode = 'button',
     open: controlledOpen,
@@ -52,11 +49,31 @@ function CheckoutContent(props: MneeCheckoutProps) {
     onWalletConnect,
     onWalletDisconnect,
   } = props;
+  const { initializeConfig, isLoading: configLoading, error: configError, buttonConfig, resolvedTheme } = useConfig();
 
-  // Button config loaded from API
-  const [buttonConfig, setButtonConfig] = useState<ButtonConfig | null>(null);
-  const [configLoading, setConfigLoading] = useState(true);
-  const [configError, setConfigError] = useState<string | null>(null);
+  useEffect(() => {
+    initializeConfig(props);
+  }, [props.buttonId, props.config, props.theme, initializeConfig, props.apiBaseUrl, props.showConfetti, props.styling]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (props.theme !== 'auto') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+      useStore.getState().config.updateResolvedTheme();
+    }
+    
+    mediaQuery.addEventListener('change', handler);
+    return () => {
+      mediaQuery.removeEventListener('change', handler);
+    }
+  }, [props.theme]);
 
   const [internalOpen, setInternalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
@@ -66,7 +83,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
   const { step, setStep, walletAddress, formData } = useCheckout();
   const wallet = useWallet();
   const { items, getCartTotal, clearCart } = useCart();
-  const resolvedTheme = useTheme(theme);
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = useCallback((open: boolean) => {
@@ -76,68 +92,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
       setInternalOpen(open);
     }
   }, [onOpenChange]);
-
-  // Load button config on mount (or use configOverride for preview mode)
-  useEffect(() => {
-    // If configOverride is provided, use it directly (preview mode)
-    if (configOverride) {
-      setButtonConfig({
-        id: 'preview',
-        buttonType: configOverride.buttonType,
-        name: configOverride.name,
-        description: configOverride.description,
-        priceUsdCents: configOverride.priceUsdCents,
-        allowCustomAmount: configOverride.allowCustomAmount ?? false,
-        suggestedAmounts: configOverride.suggestedAmounts ?? [],
-        minAmountCents: configOverride.minAmountCents,
-        maxAmountCents: configOverride.maxAmountCents,
-        productName: configOverride.productName,
-        productImage: configOverride.productImage,
-        customFields: configOverride.customFields,
-        // Cart settings
-        enableCart: configOverride.enableCart,
-        cartPosition: configOverride.cartPosition,
-        cartDisplayMode: configOverride.cartDisplayMode,
-        showQuantitySelector: configOverride.showQuantitySelector,
-        // Customer info
-        collectEmail: configOverride.collectEmail,
-        collectPhone: configOverride.collectPhone,
-        collectShipping: configOverride.collectShipping,
-        // Tax and shipping
-        taxRatePercent: configOverride.taxRatePercent,
-        shippingCostCents: configOverride.shippingCostCents,
-        freeShippingThreshold: configOverride.freeShippingThreshold,
-        buttonText: configOverride.buttonText ?? 'Pay with MNEE',
-        theme: 'light',
-        primaryColor: configOverride.primaryColor,
-      });
-      setConfigLoading(false);
-      return;
-    }
-
-    // Otherwise fetch from API (requires buttonId)
-    if (!buttonId) {
-      setConfigError('Button ID or config is required');
-      setConfigLoading(false);
-      return;
-    }
-
-    async function loadConfig() {
-      try {
-        setConfigLoading(true);
-        setConfigError(null);
-        const config = await fetchButtonConfig(apiBaseUrl, buttonId!);
-        setButtonConfig(config);
-      } catch (error: any) {
-        console.error('[MneeCheckout] Failed to load button config:', error);
-        setConfigError(error.message || 'Failed to load checkout configuration');
-        onError?.(error);
-      } finally {
-        setConfigLoading(false);
-      }
-    }
-    loadConfig();
-  }, [apiBaseUrl, buttonId, configOverride, onError]);
 
   // Convert API button config to checkout type
   const checkoutType: CheckoutType = useMemo(() => {

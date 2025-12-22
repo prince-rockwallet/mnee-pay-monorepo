@@ -8,7 +8,7 @@ import { getMneePayCheckoutBaseUrl } from "@/utils/utils";
 import { ButtonConfig } from "@/types/types";
 
 export default function DonationPage() {
-  const [buttonId, setButtonId] = useState("");
+  const [buttonId, setButtonId] = useState("9de2843c-db83-4d22-83e5-49e1e6f7885e");
   const [config, setConfig] = useState<ButtonConfig | null>(null);
   const [donated, setDonated] = useState(false);
   const [loading, setLoading] = useState(false);

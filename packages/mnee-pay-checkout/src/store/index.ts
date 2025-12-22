@@ -2,20 +2,21 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import { createUserSlice, UserSlice } from './slices/userInfoSlice';
+import { ConfigSlice, createConfigSlice } from './slices/configSlice';
 
-type StoreState = UserSlice; 
+type StoreState = UserSlice & ConfigSlice; 
 
 export const useStore = create<StoreState>()(
   devtools(
     persist(
       (...a) => ({
         ...createUserSlice(...a),
-        // ...createCartSlice(...a), // Future slices go here
+        ...createConfigSlice(...a),
       }),
       {
         name: 'mnee-checkout-storage',
         storage: createJSONStorage(() => localStorage),
-        // partialize: (state) => ({ user: { userInfo: state.user.userInfo } }), 
+        partialize: (state) => ({ user: state.user }),
       }
     ),
     { 
@@ -27,4 +28,12 @@ export const useStore = create<StoreState>()(
 
 export const useUser = () => {
   return useStore(useShallow((state) => state.user));
+};
+
+export const useConfig = () => {
+  return useStore(useShallow((state) => state.config));
+};
+
+export const useResolvedTheme = () => {
+  return useStore(useShallow((state) => state.config.resolvedTheme));
 };

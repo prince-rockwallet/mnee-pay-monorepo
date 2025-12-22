@@ -5,7 +5,6 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { CheckoutType, StyleConfig } from '../types';
 import { useCheckout } from '../contexts/CheckoutContext';
-import { ThemeProvider } from '../contexts/ThemeContext';
 import { cn } from '../lib/utils';
 
 interface CheckoutModalProps {
@@ -139,31 +138,29 @@ export function CheckoutModal({
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
-          <ThemeProvider theme={theme}>
-            <div
-              className={cn(
-                'bg-background text-foreground p-6',
-                (styling?.buttonColor || styling?.buttonTextColor) && 'mnee-custom-button-styles'
+          <div
+            className={cn(
+              'bg-background text-foreground p-6',
+              (styling?.buttonColor || styling?.buttonTextColor) && 'mnee-custom-button-styles'
+            )}
+            style={{
+              borderRadius: borderRadiusValue,
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {open && (
+                <motion.div
+                  key="checkout-modal"
+                  variants={modalVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  {children}
+                </motion.div>
               )}
-              style={{
-                borderRadius: borderRadiusValue,
-              }}
-            >
-              <AnimatePresence mode="wait">
-                {open && (
-                  <motion.div
-                    key="checkout-modal"
-                    variants={modalVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    {children}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </ThemeProvider>
+            </AnimatePresence>
+          </div>
         </DialogPrimitive.Content>
       </DialogPortal>
     </Dialog>
