@@ -12,9 +12,6 @@ export default defineConfig({
       tsconfigPath: './tsconfig.json',
     }),
   ],
-  define: {
-    'process.env.NODE_ENV': JSON.stringify('production'),
-  },
   build: {
     sourcemap: true,
     lib: {
@@ -51,5 +48,8 @@ export default defineConfig({
     },
     emptyOutDir: true,
     minify: 'esbuild',
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
   },
 });
