@@ -207,28 +207,34 @@ export function DonationCheckout({
 
       {/* Amount Selection */}
       <div className="space-y-3">
-        <Label>Select Amount</Label>
-        <div className="grid grid-cols-2 gap-3">
-          {suggestedAmounts.map((amount) => (
-            <motion.button
-              key={amount}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleAmountSelect(amount)}
-              className={`
-                relative px-4 py-3 rounded-lg border-2 transition-all
-                ${selectedAmount === amount && !isCustom
-                  ? 'border-primary bg-primary/10 text-primary font-semibold'
-                  : 'border-border hover:border-primary/50'
-                }
-              `}
-            >
-              <span className="text-lg">
-                {formatCurrency(amount, 'USD')}
-              </span>
-            </motion.button>
-          ))}
-        </div>
+        {
+          suggestedAmounts.length > 0 ?
+          <>
+            <Label>Select Amount</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {suggestedAmounts.map((amount) => (
+                <motion.button
+                  key={amount}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAmountSelect(amount)}
+                  className={`
+                    relative px-4 py-3 rounded-lg border-2 transition-all
+                    ${selectedAmount === amount && !isCustom
+                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      : 'border-border hover:border-primary/50'
+                    }
+                  `}
+                >
+                  <span className="text-lg">
+                    {formatCurrency(amount, 'USD')}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </>
+          : null
+        }
 
         {/* Custom Amount */}
         {allowCustomAmount && (
