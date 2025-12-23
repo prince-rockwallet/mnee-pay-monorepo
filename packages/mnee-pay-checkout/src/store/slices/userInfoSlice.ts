@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand';
 import { ShippingAddress, ContactInfo } from '../../types';
+import { StoreState } from '..';
 
 export interface UserInfo {
   shipping?: ShippingAddress;
@@ -25,7 +26,12 @@ const initialUserInfo: UserInfo = {
   },
 };
 
-export const createUserSlice: StateCreator<UserSlice, [["zustand/immer", never]]> = (set) => ({
+export const createUserSlice: StateCreator<
+  StoreState, 
+  [["zustand/immer", never], ["zustand/devtools", never]], 
+  [], 
+  UserSlice
+> = (set) => ({
   user: {
     userInfo: initialUserInfo,
 

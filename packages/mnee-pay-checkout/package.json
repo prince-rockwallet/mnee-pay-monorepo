@@ -23,7 +23,7 @@
     "clean": "rm -rf dist *.tgz",
     "pack": "pnpm clean && pnpm build && pnpm pack",
     "lint": "tsc",
-    "storybook": "storybook dev -p 3000",
+    "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "keywords": [],

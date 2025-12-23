@@ -51,10 +51,12 @@ function CheckoutContent(props: MneeCheckoutProps) {
   } = props;
   const { initializeConfig, isLoading: configLoading, error: configError, buttonConfig, resolvedTheme } = useConfig();
 
+  // Init config
   useEffect(() => {
     initializeConfig(props);
   }, [props.buttonId, props.config, props.theme, initializeConfig, props.apiBaseUrl, props.showConfetti, props.styling]);
 
+  // Theme listener
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;

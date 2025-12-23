@@ -5,26 +5,24 @@ import { immer } from 'zustand/middleware/immer';
 import { createUserSlice, UserSlice } from './slices/userInfoSlice';
 import { ConfigSlice, createConfigSlice } from './slices/configSlice';
 
-type StoreState = UserSlice & ConfigSlice; 
+export type StoreState = UserSlice & ConfigSlice; 
 
 export const useStore = create<StoreState>()(
   devtools(
-    immer(
-      persist(
-        (...a) => ({
-          ...createUserSlice(...a),
-          ...createConfigSlice(...a),
-        }),
-        {
-          name: 'mnee-checkout-storage',
-          storage: createJSONStorage(() => localStorage),
-          partialize: (state) => ({ user: state.user }),
-        }
-      )
+    persist(
+      immer((...a) => ({
+        ...createUserSlice(...a),
+        ...createConfigSlice(...a),
+      })),
+      {
+        name: 'mnee-checkout-storage',
+        storage: createJSONStorage(() => localStorage),
+        partialize: (state) => ({ user: state.user }),
+      }
     ),
     { 
       name: 'MneeCheckoutStore',
-      enabled: import.meta.env.DEV
+      enabled: process.env.NODE_ENV === 'development'
     }
   )
 );

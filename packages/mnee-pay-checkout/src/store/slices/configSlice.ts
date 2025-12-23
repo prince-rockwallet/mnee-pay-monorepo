@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 import { Theme, MneeCheckoutProps } from '../../types';
 import { ButtonConfig, fetchButtonConfig } from '../../lib/api';
+import { StoreState } from '..';
 
 export interface ConfigState {
   buttonConfig: ButtonConfig | null;
@@ -29,7 +30,12 @@ const initialConfigState: ConfigState = {
   apiBaseUrl: '',
 };
 
-export const createConfigSlice: StateCreator<ConfigSlice, [["zustand/immer", never]]> = (set, get) => ({
+export const createConfigSlice: StateCreator<
+  StoreState, 
+  [["zustand/immer", never], ["zustand/devtools", never]], 
+  [], 
+  ConfigSlice
+> = (set, get) => ({
   config: {
     ...initialConfigState,
 
