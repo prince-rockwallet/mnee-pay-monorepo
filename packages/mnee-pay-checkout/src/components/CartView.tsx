@@ -4,12 +4,11 @@ import { Minus, Plus, Trash2, ShoppingBag, Edit2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { useCart } from '../contexts/CartContext';
 import { ShippingForm } from './ShippingForm';
 import { formatCurrency } from '../lib/currency';
 import { validateEmail, validateShippingAddress } from '../lib/validation';
 import { toast } from 'sonner';
-import { useCheckout, useUser } from '../store';
+import { useCart, useCheckout, useUser } from '../store';
 
 interface CartViewProps {
   onContinueShopping: () => void;

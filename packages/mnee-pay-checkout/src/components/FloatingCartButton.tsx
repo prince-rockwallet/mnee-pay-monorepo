@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from './ui/button';
-import { useCart } from '../contexts/CartContext';
 import { CartPosition } from '../types';
 import { cn } from '../lib/utils';
+import { useCart } from '../store';
 
 interface FloatingCartButtonProps {
   onClick: () => void;

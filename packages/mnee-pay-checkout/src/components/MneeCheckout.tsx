@@ -3,7 +3,6 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { YoursProvider } from 'yours-wallet-provider';
-import { CartProvider, useCart } from '../contexts/CartContext';
 import { wagmiConfig } from '../lib/wagmi';
 import { CheckoutButton } from './CheckoutButton';
 import { CheckoutModal } from './CheckoutModal';
@@ -22,8 +21,9 @@ import { Loader2 } from 'lucide-react';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletSelectionModal } from './WalletSelectionModel';
 import { WalletStatusBadge } from './WalletStatusBadge';
-import { useCheckout, useConfig, useStore, useWallet } from '../store';
+import { useCart, useCheckout, useConfig, useStore, useWallet } from '../store';
 import { useWalletSync } from '../hooks/useWalletSync';
+import { useStoreSync } from '../hooks/useStoreSync';
 
 // Create a singleton QueryClient instance
 const queryClient = new QueryClient();
@@ -45,7 +45,9 @@ function CheckoutContent(props: MneeCheckoutProps) {
     onWalletConnect,
     onWalletDisconnect,
   } = props;
+  useStoreSync();
   const { initializeConfig, isLoading: configLoading, error: configError, buttonConfig, resolvedTheme } = useConfig();
+  console.log(buttonConfig);
 
   // Init config
   useEffect(() => {
@@ -568,10 +570,8 @@ export function MneeSharedProviders({ children }: { children: React.ReactNode })
         <RainbowKitProvider>
           <YoursProvider>
             <WalletSyncWrapper>
-              <CartProvider>
-                  {children}
-                  <Toaster position='top-center' richColors />
-              </CartProvider>
+                {children}
+                <Toaster position='top-center' richColors />
             </WalletSyncWrapper>
           </YoursProvider>
         </RainbowKitProvider>

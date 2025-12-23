@@ -6,6 +6,7 @@ import { createUserSlice } from './slices/userInfoSlice';
 import { createConfigSlice } from './slices/configSlice';
 import { createWalletSlice } from './slices/walletSlice';
 import { createCheckoutSlice } from './slices/checkoutSlice';
+import { createCartSlice } from './slices/cartSlice';
 import { StoreState } from './types';
 
 
@@ -17,6 +18,7 @@ export const useStore = create<StoreState>()(
         ...createConfigSlice(...a),
         ...createWalletSlice(...a),
         ...createCheckoutSlice(...a),
+        ...createCartSlice(...a),
       })),
       {
         name: 'mnee-checkout-storage',
@@ -27,7 +29,8 @@ export const useStore = create<StoreState>()(
             address: state.wallet.address, 
             provider: state.wallet.provider,
             isConnected: state.wallet.isConnected 
-          }
+          },
+          cart: state.cart
         }),
       }
     ),
@@ -63,5 +66,12 @@ export const useCheckout = () => {
   return useStore(useShallow((state) => ({
     ...state.checkout,
     ...state.checkoutActions
+  })));
+};
+
+export const useCart = () => {
+  return useStore(useShallow((state) => ({
+    ...state.cart,
+    ...state.cartActions
   })));
 };

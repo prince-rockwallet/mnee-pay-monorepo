@@ -1,6 +1,6 @@
 import { WalletProviderType } from "..";
-import { ButtonConfig, CartItem, ChainName } from "../lib/api";
-import { CheckoutFormData, CheckoutState, ContactInfo, MneeCheckoutProps, PaymentMethod, PaymentResult, ShippingAddress, Theme } from "../types";
+import { ButtonConfig, CartItem as CartItemAPI, ChainName } from "../lib/api";
+import { CartItem, CheckoutFormData, CheckoutState, ContactInfo, MneeCheckoutProps, PaymentMethod, PaymentResult, ShippingAddress, Theme } from "../types";
 
 export interface UserState {
   shipping?: ShippingAddress;
@@ -116,7 +116,7 @@ export interface CheckoutActions {
     chain: ChainName,
     stablecoin: string,
     selectedOptions?: Record<string, string>,
-    cartItems?: CartItem[],
+    cartItems?: CartItemAPI[],
     subtotalCents?: number,
     taxCents?: number,
     shippingCents?: number,
@@ -129,4 +129,38 @@ export interface CheckoutSlice {
   checkoutActions: CheckoutActions;
 }
 
-export type StoreState = UserSlice & ConfigSlice & WalletSlice & CheckoutSlice;
+export interface CartTotals {
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  itemBreakdown: Array<{
+    itemId: string;
+    itemSubtotal: number;
+    itemTax: number;
+    itemShipping: number;
+    itemTotal: number;
+  }>;
+}
+
+export interface CartSliceState {
+  items: CartItem[];
+  itemCount: number;
+  subtotal: number;
+}
+
+export interface CartActions {
+  addToCart: (item: Omit<CartItem, 'id'>) => void;
+  removeFromCart: (itemId: string) => void;
+  updateQuantity: (itemId: string, quantity: number) => void;
+  clearCart: () => void;
+  getCartTotal: () => CartTotals;
+  syncCartState: (state: CartSliceState) => void;
+}
+
+export interface CartSlice {
+  cart: CartSliceState;
+  cartActions: CartActions;
+}
+
+export type StoreState = UserSlice & ConfigSlice & WalletSlice & CheckoutSlice & CartSlice;

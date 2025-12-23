@@ -6,12 +6,11 @@ import { Label } from '../ui/label';
 import { EcommerceConfig, CustomField } from '../../types';
 import { DynamicForm } from '../DynamicForm';
 import { ShippingForm } from '../ShippingForm';
-import { useCart } from '../../contexts/CartContext';
 import { formatCurrency } from '../../lib/currency';
 import { calculateOptionsTotal, getOptionPrices } from '../../lib/pricing';
 import { validateFields, validateEmail, validateShippingAddress } from '../../lib/validation';
 import { toast } from 'sonner';
-import { useCheckout, useUser } from '../../store';
+import { useCart, useCheckout, useUser } from '../../store';
 
 interface EcommerceCheckoutProps {
   config?: EcommerceConfig;
