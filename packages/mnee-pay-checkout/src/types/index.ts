@@ -657,11 +657,7 @@ export interface MneeCheckoutProps extends CheckoutCallbacks {
 // ============================================================================
 
 export interface CheckoutFormData {
-  email?: string;
-  phone?: string;
   customFields: Record<string, any>;
-  shipping?: ShippingAddress;
-  contact?: ContactInfo;
   quantity?: number;
   donationAmount?: number;
 }

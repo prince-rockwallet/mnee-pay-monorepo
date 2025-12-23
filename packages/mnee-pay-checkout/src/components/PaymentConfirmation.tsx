@@ -21,7 +21,6 @@ import {
   Stablecoin,
   CheckoutType,
 } from "../types";
-import { useCheckout } from "../contexts/CheckoutContext";
 import confetti from "canvas-confetti";
 import { formatCurrency } from "../lib/currency";
 import { TokenSelector } from "./TokenSelector";
@@ -34,23 +33,19 @@ import {
   formatTransactionHash,
 } from "../lib/payment";
 import { completeSession, getTransactionStatus, getChainName } from "../lib/api";
+import { useCheckout, useConfig, useWallet } from "../store";
+import { toast } from "sonner";
 
 interface PaymentConfirmationProps {
   onSuccess: (result: PaymentResult) => Promise<void> | void;
   onError: (error: Error) => void;
-  showConfetti?: boolean;
   styling?: StyleConfig;
   onComplete?: () => void;
 
   // Session creation params
-  apiBaseUrl: string;
-  buttonId?: string;
   amountUsdCents: number;
   checkoutType: CheckoutType;
-  customerEmail?: string;
-  customerPhone?: string;
   selectedOptions?: Record<string, string>;
-  shippingAddress?: any;
   cartItems?: any[];
   subtotalCents?: number;
   taxCents?: number;
@@ -69,17 +64,11 @@ interface PaymentConfirmationProps {
 export function PaymentConfirmation({
   onSuccess,
   onError,
-  showConfetti = false,
   styling,
   onComplete,
-  apiBaseUrl,
-  buttonId,
   amountUsdCents,
   // checkoutType,
-  customerEmail,
-  customerPhone,
   selectedOptions,
-  shippingAddress,
   cartItems,
   subtotalCents,
   taxCents,
@@ -94,14 +83,16 @@ export function PaymentConfirmation({
   calculateTotalsUrl: _calculateTotalsUrl,
 }: PaymentConfirmationProps) {
   const {
-    walletAddress,
-    walletProvider,
     step,
     setStep,
     setPaymentResult,
     createSession,
     session,
+    isCreatingSession,
   } = useCheckout();
+  const { buttonConfig, apiBaseUrl } = useConfig();
+
+  const { address: walletAddress, provider: walletProvider } = useWallet();
 
   const { address: userAddress, chainId: currentChainId } = useAccount();
   const { switchChain } = useSwitchChain();
@@ -117,7 +108,6 @@ export function PaymentConfirmation({
   const [txHash, setTxHash] = useState<string | undefined>();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [copied, setCopied] = useState(false);
-  const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isPreparingPayment, setIsPreparingPayment] = useState(false);
 
   // Confirmation progress state
@@ -153,20 +143,14 @@ export function PaymentConfirmation({
       step === "confirming" &&
       !isCreatingSession
     ) {
-      setIsCreatingSession(true);
 
       (async () => {
         try {
           await createSession(
-            apiBaseUrl,
-            buttonId!, // buttonId is always provided by MneeCheckout
             amountUsdCents,
             "BSV",
             "MNEE",
-            customerEmail,
             selectedOptions,
-            customerPhone,
-            shippingAddress,
             cartItems,
             subtotalCents,
             taxCents,
@@ -174,15 +158,16 @@ export function PaymentConfirmation({
             quantity
           );
         } catch (error: any) {
+          toast.error(error?.message || "Failed to create checkout session");
           console.error("[PaymentConfirmation] Failed to create session:", error);
           setErrorMessage(error.message || "Failed to create checkout session");
           setStep("error");
           onError(error);
-          setIsCreatingSession(false);
         }
       })();
     }
-  }, [walletProvider, session, walletAddress, step, isCreatingSession, createSession, apiBaseUrl, buttonId, amountUsdCents, customerEmail, customerPhone, selectedOptions, shippingAddress, cartItems, subtotalCents, taxCents, shippingCents, quantity, setStep, onError]);
+  }, [walletProvider, session, walletAddress, step, isCreatingSession, createSession, amountUsdCents, selectedOptions, cartItems, subtotalCents, taxCents, shippingCents, quantity, setStep, onError]);
+
 
   // Handle token selection
   const handleTokenSelect = (
@@ -208,15 +193,10 @@ export function PaymentConfirmation({
       const chainName = getChainName(selectedChainId);
 
       await createSession(
-        apiBaseUrl,
-        buttonId!, // buttonId is always provided by MneeCheckout
         amountUsdCents,
         chainName,
         selectedToken,
-        customerEmail,
         selectedOptions,
-        customerPhone,
-        shippingAddress,
         cartItems,
         subtotalCents,
         taxCents,
@@ -228,6 +208,7 @@ export function PaymentConfirmation({
       setIsPreparingPayment(false);
       setStep("confirming");
     } catch (error: any) {
+      toast.error(error?.message || 'Failed to prepare payment');
       console.error("Payment preparation failed:", error);
       setErrorMessage(error.message || "Failed to prepare payment");
       setIsPreparingPayment(false);
@@ -451,7 +432,7 @@ export function PaymentConfirmation({
 
           if (status.isConfirmed) {
             setStep("complete");
-            if (showConfetti) {
+            if (buttonConfig?.showConfetti) {
               const colors = styling?.buttonColor
                 ? [styling.buttonColor, styling.primaryColor || "#8b5cf6"]
                 : ["#8b5cf6", "#ec4899", "#3b82f6", "#10b981", "#f59e0b"];
@@ -477,7 +458,7 @@ export function PaymentConfirmation({
 
   // Trigger confetti when step becomes 'complete'
   useEffect(() => {
-    if (step === "complete" && showConfetti && !txHash) {
+    if (step === "complete" && buttonConfig?.showConfetti && !txHash) {
       const colors = styling?.buttonColor
         ? [styling.buttonColor, styling.primaryColor || "#8b5cf6"]
         : ["#8b5cf6", "#ec4899", "#3b82f6", "#10b981", "#f59e0b"];
@@ -488,7 +469,7 @@ export function PaymentConfirmation({
         colors,
       });
     }
-  }, [step, showConfetti, styling, txHash]);
+  }, [step, buttonConfig?.showConfetti, styling, txHash]);
 
   // Complete state
   if (step === "complete" && txHash) {

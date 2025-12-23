@@ -17,14 +17,15 @@ export const createConfigSlice: StateCreator<
   [], 
   ConfigSlice
 > = (set, get) => ({
-  config: {
-    ...initialConfigState,
+  config: initialConfigState,
+
+  configActions: {
 
     setTheme: (theme) => {
       set((state) => {
         state.config.theme = theme;
       });
-      get().config.updateResolvedTheme();
+      get().configActions.updateResolvedTheme();
     },
 
     updateResolvedTheme: () => {
@@ -54,7 +55,7 @@ export const createConfigSlice: StateCreator<
         state.config.theme = theme;
       });
 
-      get().config.updateResolvedTheme();
+      get().configActions.updateResolvedTheme();
 
       if (configOverride) {
         const mockConfig: ButtonConfig = {

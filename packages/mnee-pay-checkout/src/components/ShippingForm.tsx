@@ -1,10 +1,8 @@
-import { useEffect } from 'react';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ShippingAddress } from '../types';
-import { useCheckout } from '../contexts/CheckoutContext';
-import { useStore } from '../store';
+import { useCheckout, useUser } from '../store';
 
 const COUNTRIES = [
   { value: 'US', label: 'United States' },
@@ -20,11 +18,10 @@ interface ShippingFormProps {
 }
 
 export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
-  const { formData, updateFormData, errors } = useCheckout();
-  const userInfo = useStore((state) => state.user.userInfo);
-  const setShipping = useStore((state) => state.user.setShipping);
+  const { errors } = useCheckout();
+  const { shipping, setShipping } = useUser();
 
-  const shipping = formData.shipping || {
+  const shippingAddress = shipping || {
     firstName: '',
     lastName: '',
     address1: '',
@@ -36,38 +33,24 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
     ...defaultValues,
   };
 
-  // Load saved shipping address on mount only
-  useEffect(() => {
-    if (userInfo.shipping && !formData.shipping) {
-      updateFormData({ shipping: userInfo.shipping });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
-
   const handleChange = (field: keyof ShippingAddress, value: string) => {
-    const updatedShipping = {
-      ...shipping,
+    const updatedShipping: ShippingAddress = {
+      ...shippingAddress,
       [field]: value,
     };
 
-    updateFormData({
-      shipping: updatedShipping,
-    });
-
-    // Save to localStorage as user types
     setShipping(updatedShipping);
   };
 
   const handleBlur = () => {
-    // Check if all required fields are filled
     const isComplete = Boolean(
-      shipping.firstName?.trim() &&
-      shipping.lastName?.trim() &&
-      shipping.address1?.trim() &&
-      shipping.city?.trim() &&
-      shipping.state?.trim() &&
-      shipping.postalCode?.trim() &&
-      shipping.country
+      shippingAddress.firstName?.trim() &&
+      shippingAddress.lastName?.trim() &&
+      shippingAddress.address1?.trim() &&
+      shippingAddress.city?.trim() &&
+      shippingAddress.state?.trim() &&
+      shippingAddress.postalCode?.trim() &&
+      shippingAddress.country
     );
 
     if (isComplete && onComplete) {
@@ -84,7 +67,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
           </Label>
           <Input
             id="firstName"
-            value={shipping.firstName}
+            value={shippingAddress.firstName}
             onChange={(e) => handleChange('firstName', e.target.value)}
             onBlur={handleBlur}
             className={errors.firstName ? 'border-destructive' : ''}
@@ -100,7 +83,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
           </Label>
           <Input
             id="lastName"
-            value={shipping.lastName}
+            value={shippingAddress.lastName}
             onChange={(e) => handleChange('lastName', e.target.value)}
             onBlur={handleBlur}
             className={errors.lastName ? 'border-destructive' : ''}
@@ -117,7 +100,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
         </Label>
         <Input
           id="address1"
-          value={shipping.address1}
+          value={shippingAddress.address1}
           onChange={(e) => handleChange('address1', e.target.value)}
           onBlur={handleBlur}
           className={errors.address1 ? 'border-destructive' : ''}
@@ -131,7 +114,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
         <Label htmlFor="address2" className="text-foreground">Apartment, suite, etc. (optional)</Label>
         <Input
           id="address2"
-          value={shipping.address2 || ''}
+          value={shippingAddress.address2 || ''}
           onChange={(e) => handleChange('address2', e.target.value)}
         />
       </div>
@@ -143,7 +126,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
           </Label>
           <Input
             id="city"
-            value={shipping.city}
+            value={shippingAddress.city}
             onChange={(e) => handleChange('city', e.target.value)}
             onBlur={handleBlur}
             className={errors.city ? 'border-destructive' : ''}
@@ -159,7 +142,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
           </Label>
           <Input
             id="state"
-            value={shipping.state}
+            value={shippingAddress.state}
             onChange={(e) => handleChange('state', e.target.value)}
             onBlur={handleBlur}
             className={errors.state ? 'border-destructive' : ''}
@@ -177,7 +160,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
           </Label>
           <Input
             id="postalCode"
-            value={shipping.postalCode}
+            value={shippingAddress.postalCode}
             onChange={(e) => handleChange('postalCode', e.target.value)}
             onBlur={handleBlur}
             className={errors.postalCode ? 'border-destructive' : ''}
@@ -192,7 +175,7 @@ export function ShippingForm({ defaultValues, onComplete }: ShippingFormProps) {
             Country <span className="text-destructive">*</span>
           </Label>
           <Select
-            value={shipping.country}
+            value={shippingAddress.country}
             onValueChange={(value) => handleChange('country', value)}
           >
             <SelectTrigger className={errors.country ? 'border-destructive' : ''}>

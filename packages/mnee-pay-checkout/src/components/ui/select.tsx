@@ -2,7 +2,7 @@ import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { useResolvedTheme } from "../../store";
+import { useConfig } from "../../store";
 
 const Select = SelectPrimitive.Root;
 
@@ -71,7 +71,7 @@ const SelectContent = React.forwardRef<
     container?: HTMLElement | null;
   }
 >(({ className, children, position = "popper", container, ...props }, ref) => {
-  const theme = useResolvedTheme();
+  const { theme } = useConfig();
   const isDark = theme === 'dark';
 
   return (
@@ -124,7 +124,7 @@ const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
 >(({ className, children, ...props }, ref) => {
-  const theme = useResolvedTheme();
+  const { theme } = useConfig();
   const isDark = theme === 'dark';
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ShoppingBag, Minus, Plus, Edit2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -6,13 +6,12 @@ import { Label } from '../ui/label';
 import { EcommerceConfig, CustomField } from '../../types';
 import { DynamicForm } from '../DynamicForm';
 import { ShippingForm } from '../ShippingForm';
-import { useCheckout } from '../../contexts/CheckoutContext';
 import { useCart } from '../../contexts/CartContext';
 import { formatCurrency } from '../../lib/currency';
 import { calculateOptionsTotal, getOptionPrices } from '../../lib/pricing';
 import { validateFields, validateEmail, validateShippingAddress } from '../../lib/validation';
 import { toast } from 'sonner';
-import { useStore } from '../../store';
+import { useCheckout, useUser } from '../../store';
 
 interface EcommerceCheckoutProps {
   config?: EcommerceConfig;
@@ -50,41 +49,24 @@ export function EcommerceCheckout({
   freeShippingThreshold,
 }: EcommerceCheckoutProps) {
   const { formData, updateFormData, setErrors, errors } = useCheckout();
+  const { contact, shipping, setEmail, setPhone } = useUser();
   const { addToCart, itemCount } = useCart();
-  const userInfo = useStore((state) => state.user.userInfo);
-  const setEmail = useStore((state) => state.user.setEmail);
-  const setPhone = useStore((state) => state.user.setPhone);
   const quantity = formData.quantity || config?.quantity || 1;
   const isCartEnabled = config?.enableCart || false;
 
-  // Load saved email and phone on mount only
-  useEffect(() => {
-    const updates: Record<string, string> = {};
-    if (collectEmail && userInfo.contact.email && !formData.email) {
-      updates.email = userInfo.contact.email;
-    }
-    if (collectPhone && userInfo.contact.phone && !formData.phone) {
-      updates.phone = userInfo.contact.phone;
-    }
-    if (Object.keys(updates).length > 0) {
-      updateFormData(updates);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
-
   // Determine if contact info (email/phone) and shipping are COMPLETE
   const isContactComplete = Boolean(
-    (!collectEmail || (formData.email && formData.email.includes('@') && formData.email.includes('.'))) &&
-    (!collectPhone || (formData.phone && formData.phone.trim().length >= 7))
+    (!collectEmail || (contact.email && contact.email.includes('@') && contact.email.includes('.'))) &&
+    (!collectPhone || (contact.phone && contact.phone.trim().length >= 7))
   );
   const isShippingComplete = Boolean(
-    formData.shipping?.firstName &&
-    formData.shipping?.lastName &&
-    formData.shipping?.address1 &&
-    formData.shipping?.city &&
-    formData.shipping?.state &&
-    formData.shipping?.postalCode &&
-    formData.shipping?.country
+    shipping?.firstName &&
+    shipping?.lastName &&
+    shipping?.address1 &&
+    shipping?.city &&
+    shipping?.state &&
+    shipping?.postalCode &&
+    shipping?.country
   );
 
   // Track if contact/shipping sections are expanded or collapsed
@@ -93,8 +75,8 @@ export function EcommerceCheckout({
 
   // Helper function to collapse contact section when user leaves fields
   const handleContactBlur = () => {
-    const emailValid = !collectEmail || (formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email));
-    const phoneValid = !collectPhone || (formData.phone && formData.phone.trim().length >= 7);
+    const emailValid = !collectEmail || (contact.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email));
+    const phoneValid = !collectPhone || (contact.phone && contact.phone.trim().length >= 7);
 
     if (emailValid && phoneValid) {
       setIsContactExpanded(false);
@@ -105,15 +87,15 @@ export function EcommerceCheckout({
   const handleShippingBlur = () => {
     // Only collapse if all required fields are filled and valid
     const isValid = Boolean(
-      formData.shipping?.firstName &&
-      formData.shipping?.lastName &&
-      formData.shipping?.address1 &&
-      formData.shipping?.city &&
-      formData.shipping?.state &&
-      formData.shipping?.postalCode &&
-      formData.shipping?.country &&
-      formData.shipping.firstName.trim().length > 0 &&
-      formData.shipping.lastName.trim().length > 0
+      shipping?.firstName &&
+      shipping?.lastName &&
+      shipping?.address1 &&
+      shipping?.city &&
+      shipping?.state &&
+      shipping?.postalCode &&
+      shipping?.country &&
+      shipping.firstName.trim().length > 0 &&
+      shipping.lastName.trim().length > 0
     );
 
     if (isValid) {
@@ -188,7 +170,7 @@ export function EcommerceCheckout({
 
     // Validate email if required
     if (collectEmail) {
-      const emailError = validateEmail(formData.email || "");
+      const emailError = validateEmail(contact.email || "");
       if (emailError) {
         errors.email = emailError;
       }
@@ -196,7 +178,7 @@ export function EcommerceCheckout({
 
     // Validate phone if required
     if (collectPhone) {
-      if (!formData.phone || formData.phone.trim().length < 7) {
+      if (!contact.phone || contact.phone.trim().length < 7) {
         errors.phone = 'Please enter a valid phone number';
       }
     }
@@ -209,7 +191,7 @@ export function EcommerceCheckout({
 
     // Validate shipping address if required
     if (collectShipping) {
-      const shippingErrors = validateShippingAddress(formData);
+      const shippingErrors = validateShippingAddress(shipping);
       Object.assign(errors, shippingErrors);
     }
 
@@ -317,16 +299,16 @@ export function EcommerceCheckout({
 
           {!isContactExpanded && isContactComplete ? (
             <div className="bg-muted/30 rounded-md p-3 text-sm space-y-2">
-              {collectEmail && formData.email && (
+              {collectEmail && contact.email && (
                 <div>
                   <p className="text-muted-foreground">Email</p>
-                  <p className="font-medium">{formData.email}</p>
+                  <p className="font-medium">{contact.email}</p>
                 </div>
               )}
-              {collectPhone && formData.phone && (
+              {collectPhone && contact.phone && (
                 <div>
                   <p className="text-muted-foreground">Phone</p>
-                  <p className="font-medium">{formData.phone}</p>
+                  <p className="font-medium">{contact.phone}</p>
                 </div>
               )}
             </div>
@@ -341,9 +323,8 @@ export function EcommerceCheckout({
                     id="email"
                     type="email"
                     placeholder="your@email.com"
-                    value={formData.email || ''}
+                    value={contact.email || ''}
                     onChange={(e) => {
-                      updateFormData({ email: e.target.value });
                       setEmail(e.target.value);
                     }}
                     onBlur={handleContactBlur}
@@ -363,9 +344,8 @@ export function EcommerceCheckout({
                     id="phone"
                     type="tel"
                     placeholder="+1 (555) 123-4567"
-                    value={formData.phone || ''}
+                    value={contact.phone || ''}
                     onChange={(e) => {
-                      updateFormData({ phone: e.target.value });
                       setPhone(e.target.value);
                     }}
                     onBlur={handleContactBlur}
@@ -399,19 +379,19 @@ export function EcommerceCheckout({
             )}
           </div>
 
-          {!isShippingExpanded && isShippingComplete && formData.shipping ? (
+          {!isShippingExpanded && isShippingComplete && shipping ? (
             <div className="bg-muted/30 rounded-md p-3 text-sm space-y-1">
               <p className="font-medium">
-                {formData.shipping.firstName} {formData.shipping.lastName}
+                {shipping.firstName} {shipping.lastName}
               </p>
-              <p className="text-muted-foreground">{formData.shipping.address1}</p>
-              {formData.shipping.address2 && (
-                <p className="text-muted-foreground">{formData.shipping.address2}</p>
+              <p className="text-muted-foreground">{shipping.address1}</p>
+              {shipping.address2 && (
+                <p className="text-muted-foreground">{shipping.address2}</p>
               )}
               <p className="text-muted-foreground">
-                {formData.shipping.city}, {formData.shipping.state} {formData.shipping.postalCode}
+                {shipping.city}, {shipping.state} {shipping.postalCode}
               </p>
-              <p className="text-muted-foreground">{formData.shipping.country}</p>
+              <p className="text-muted-foreground">{shipping.country}</p>
             </div>
           ) : (
             <ShippingForm onComplete={handleShippingBlur} />

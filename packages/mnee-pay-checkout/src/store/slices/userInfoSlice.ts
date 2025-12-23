@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
-import { StoreState, UserInfo, UserSlice } from '../types';
+import { StoreState, UserSlice, UserState } from '../types';
 
-const initialUserInfo: UserInfo = {
+const initialUserInfo: UserState = {
   shipping: undefined,
   contact: {
     email: undefined,
@@ -15,32 +15,31 @@ export const createUserSlice: StateCreator<
   [], 
   UserSlice
 > = (set) => ({
-  user: {
-    userInfo: initialUserInfo,
-
+  user: initialUserInfo,
+  userActions: {
     setEmail: (email) =>
       set((state) => {
-        state.user.userInfo.contact.email = email;
+        state.user.contact.email = email;
       }),
 
     setPhone: (phone) =>
       set((state) => {
-        state.user.userInfo.contact.phone = phone;
+        state.user.contact.phone = phone;
       }),
 
     setShipping: (shipping) =>
       set((state) => {
-        state.user.userInfo.shipping = shipping;
+        state.user.shipping = shipping;
       }),
 
     setContact: (contact) =>
       set((state) => {
-        state.user.userInfo.contact = contact;
+        state.user.contact = contact;
       }),
 
     clearUserInfo: () =>
       set((state) => {
-        state.user.userInfo = initialUserInfo;
+        state.user = initialUserInfo;
       }),
   },
 });

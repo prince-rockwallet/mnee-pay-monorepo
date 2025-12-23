@@ -4,8 +4,8 @@ import { Dialog, DialogTitle, DialogDescription, DialogOverlay, DialogPortal } f
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { CheckoutType, StyleConfig } from '../types';
-import { useCheckout } from '../contexts/CheckoutContext';
 import { cn } from '../lib/utils';
+import { useCheckout } from '../store';
 
 interface CheckoutModalProps {
   open: boolean;

@@ -1,4 +1,4 @@
-import { CustomField, CheckoutFormData } from '../types';
+import { CustomField, CheckoutFormData, ShippingAddress } from '../types';
 
 /**
  * Validates a single field value against its validation rules
@@ -105,9 +105,8 @@ export function validateEmail(email: string): string | null {
 /**
  * Validates shipping address
  */
-export function validateShippingAddress(formData: CheckoutFormData): Record<string, string> {
+export function validateShippingAddress(shipping?: ShippingAddress): Record<string, string> {
   const errors: Record<string, string> = {};
-  const shipping = formData.shipping;
 
   if (!shipping) {
     return {

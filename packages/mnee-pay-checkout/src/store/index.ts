@@ -5,6 +5,7 @@ import { immer } from 'zustand/middleware/immer';
 import { createUserSlice } from './slices/userInfoSlice';
 import { createConfigSlice } from './slices/configSlice';
 import { createWalletSlice } from './slices/walletSlice';
+import { createCheckoutSlice } from './slices/checkoutSlice';
 import { StoreState } from './types';
 
 
@@ -15,6 +16,7 @@ export const useStore = create<StoreState>()(
         ...createUserSlice(...a),
         ...createConfigSlice(...a),
         ...createWalletSlice(...a),
+        ...createCheckoutSlice(...a),
       })),
       {
         name: 'mnee-checkout-storage',
@@ -37,20 +39,29 @@ export const useStore = create<StoreState>()(
 );
 
 export const useUser = () => {
-  return useStore(useShallow((state) => state.user));
+  return useStore(useShallow((state) => ({
+    ...state.user,
+    ...state.userActions
+  })));
 };
 
 export const useConfig = () => {
-  return useStore(useShallow((state) => state.config));
-};
-
-export const useResolvedTheme = () => {
-  return useStore(useShallow((state) => state.config.resolvedTheme));
+  return useStore(useShallow((state) => ({
+    ...state.config,
+    ...state.configActions
+  })));
 };
 
 export const useWallet = () => {
   return useStore(useShallow((state) => ({
-    ...state.wallet,        
-    ...state.walletActions 
+    ...state.wallet,
+    ...state.walletActions
+  })));
+};
+
+export const useCheckout = () => {
+  return useStore(useShallow((state) => ({
+    ...state.checkout,
+    ...state.checkoutActions
   })));
 };

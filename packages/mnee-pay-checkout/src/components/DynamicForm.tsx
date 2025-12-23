@@ -8,8 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { useCheckout } from '../contexts/CheckoutContext';
 import { formatCurrency } from '../lib/currency';
+import { useCheckout } from '../store';
 
 interface DynamicFormProps {
   fields: CustomField[];

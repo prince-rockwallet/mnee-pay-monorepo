@@ -3,7 +3,6 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { YoursProvider } from 'yours-wallet-provider';
-import { CheckoutProvider, useCheckout } from '../contexts/CheckoutContext';
 import { CartProvider, useCart } from '../contexts/CartContext';
 import { wagmiConfig } from '../lib/wagmi';
 import { CheckoutButton } from './CheckoutButton';
@@ -23,7 +22,7 @@ import { Loader2 } from 'lucide-react';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletSelectionModal } from './WalletSelectionModel';
 import { WalletStatusBadge } from './WalletStatusBadge';
-import { useConfig, useStore, useWallet } from '../store';
+import { useCheckout, useConfig, useStore, useWallet } from '../store';
 import { useWalletSync } from '../hooks/useWalletSync';
 
 // Create a singleton QueryClient instance
@@ -31,8 +30,6 @@ const queryClient = new QueryClient();
 
 function CheckoutContent(props: MneeCheckoutProps) {
   const {
-    buttonId,
-    apiBaseUrl,
     previewMode = false,
     styling,
     triggerMode = 'button',
@@ -42,7 +39,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
     disabled,
     className,
     children,
-    showConfetti,
     onSuccess,
     onCancel,
     onError,
@@ -68,7 +64,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
-      useStore.getState().config.updateResolvedTheme();
+      useStore.getState().configActions.updateResolvedTheme();
     }
     
     mediaQuery.addEventListener('change', handler);
@@ -340,18 +336,12 @@ function CheckoutContent(props: MneeCheckoutProps) {
       case 'error':
         return (
           <PaymentConfirmation
-            apiBaseUrl={apiBaseUrl}
-            buttonId={buttonId || 'preview'}
             amountUsdCents={cartSessionData ? cartSessionData.totalCents : amountUsdCents}
             onSuccess={handlePaymentSuccess}
             onError={handlePaymentError}
-            showConfetti={showConfetti}
             styling={resolvedStyling}
             checkoutType={checkoutType}
-            customerEmail={formData.email}
-            customerPhone={formData.phone}
             selectedOptions={formData.customFields}
-            shippingAddress={formData.shipping}
             quantity={formData.quantity}
             cartItems={cartSessionData?.cartItems}
             subtotalCents={cartSessionData?.subtotalCents}
@@ -563,9 +553,7 @@ function WalletSyncWrapper(props: PropsWithChildren) {
 // Wrapper with CheckoutProvider only (use when already inside MneeSharedProviders)
 export function MneeCheckoutWithoutProviders(props: MneeCheckoutProps) {
   return (
-    <CheckoutProvider>
-      <CheckoutContent {...props} />
-    </CheckoutProvider>
+    <CheckoutContent {...props} />
   );
 }
 

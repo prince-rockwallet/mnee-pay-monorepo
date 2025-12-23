@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Lock, Unlock, Edit2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { PaywallConfig, CustomField } from '../../types';
 import { DynamicForm } from '../DynamicForm';
-import { useCheckout } from '../../contexts/CheckoutContext';
 import { formatCurrency } from '../../lib/currency';
 import { calculateOptionsTotal } from '../../lib/pricing';
 import { validateFields, validateEmail } from '../../lib/validation';
 import { toast } from 'sonner';
-import { useStore } from '../../store';
+import { useCheckout, useUser } from '../../store';
 
 interface PaywallCheckoutProps {
   config?: PaywallConfig;
@@ -36,30 +35,13 @@ export function PaywallCheckout({
   taxRatePercent,
   shippingCostCents,
 }: PaywallCheckoutProps) {
-  const { formData, updateFormData, setErrors, errors } = useCheckout();
-  const userInfo = useStore((state) => state.user.userInfo);
-  const setEmail = useStore((state) => state.user.setEmail);
-  const setPhone = useStore((state) => state.user.setPhone);
-
-  // Load saved email on mount only
-  useEffect(() => {
-    const updates: Record<string, string> = {};
-    if (collectEmail && userInfo.contact.email && !formData.email) {
-      updates.email = userInfo.contact.email;
-    }
-    if (collectPhone && userInfo.contact.phone && !formData.phone) {
-      updates.phone = userInfo.contact.phone;
-    }
-    if (Object.keys(updates).length > 0) {
-      updateFormData(updates);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  const { formData, setErrors, errors } = useCheckout();
+  const { contact, setEmail, setPhone } = useUser();
 
   // Determine if contact info (email/phone) is COMPLETE
   const isContactComplete = Boolean(
-    (!collectEmail || (formData.email && formData.email.includes('@') && formData.email.includes('.'))) &&
-    (!collectPhone || (formData.phone && formData.phone.trim().length >= 7))
+    (!collectEmail || (contact.email && contact.email.includes('@') && contact.email.includes('.'))) &&
+    (!collectPhone || (contact.phone && contact.phone.trim().length >= 7))
   );
 
   // Track if contact section is expanded or collapsed
@@ -67,8 +49,8 @@ export function PaywallCheckout({
 
   // Helper function to collapse contact section when user leaves fields
   const handleContactBlur = () => {
-    const emailValid = !collectEmail || (formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email));
-    const phoneValid = !collectPhone || (formData.phone && formData.phone.trim().length >= 7);
+    const emailValid = !collectEmail || (contact.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email));
+    const phoneValid = !collectPhone || (contact.phone && contact.phone.trim().length >= 7);
 
     if (emailValid && phoneValid) {
       setIsContactExpanded(false);
@@ -98,7 +80,7 @@ export function PaywallCheckout({
 
     // Validate email if required
     if (collectEmail) {
-      const emailError = validateEmail(formData.email || "");
+      const emailError = validateEmail(contact.email || "");
       if (emailError) {
         errors.email = emailError;
       }
@@ -106,7 +88,7 @@ export function PaywallCheckout({
 
     // Validate phone if required
     if (collectPhone) {
-      if (!formData.phone || formData.phone.trim().length < 7) {
+      if (!contact.phone || contact.phone.trim().length < 7) {
         errors.phone = 'Please enter a valid phone number';
       }
     }
@@ -222,16 +204,16 @@ export function PaywallCheckout({
 
           {!isContactExpanded && isContactComplete ? (
             <div className="bg-muted/30 rounded-md p-3 text-sm space-y-2">
-              {collectEmail && formData.email && (
+              {collectEmail && contact.email && (
                 <div>
                   <p className="text-muted-foreground">Email</p>
-                  <p className="font-medium">{formData.email}</p>
+                  <p className="font-medium">{contact.email}</p>
                 </div>
               )}
-              {collectPhone && formData.phone && (
+              {collectPhone && contact.phone && (
                 <div>
                   <p className="text-muted-foreground">Phone</p>
-                  <p className="font-medium">{formData.phone}</p>
+                  <p className="font-medium">{contact.phone}</p>
                 </div>
               )}
             </div>
@@ -246,9 +228,8 @@ export function PaywallCheckout({
                     id="email"
                     type="email"
                     placeholder="your@email.com"
-                    value={formData.email || ''}
+                    value={contact.email || ''}
                     onChange={(e) => {
-                      updateFormData({ email: e.target.value });
                       setEmail(e.target.value);
                     }}
                     onBlur={handleContactBlur}
@@ -268,9 +249,8 @@ export function PaywallCheckout({
                     id="phone"
                     type="tel"
                     placeholder="+1 (555) 123-4567"
-                    value={formData.phone || ''}
+                    value={contact.phone || ''}
                     onChange={(e) => {
-                      updateFormData({ phone: e.target.value });
                       setPhone(e.target.value);
                     }}
                     onBlur={handleContactBlur}
