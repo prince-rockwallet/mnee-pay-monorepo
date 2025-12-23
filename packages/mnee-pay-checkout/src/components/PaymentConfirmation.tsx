@@ -37,9 +37,9 @@ import { useCheckout, useConfig, useWallet } from "../store";
 import { toast } from "sonner";
 
 interface PaymentConfirmationProps {
+  styling?: StyleConfig;
   onSuccess: (result: PaymentResult) => Promise<void> | void;
   onError: (error: Error) => void;
-  styling?: StyleConfig;
   onComplete?: () => void;
 
   // Session creation params
@@ -51,14 +51,6 @@ interface PaymentConfirmationProps {
   taxCents?: number;
   shippingCents?: number;
   quantity?: number;
-
-  // Legacy cart checkout props (for CartCheckoutModal)
-  merchantId?: string;
-  sessionMetadata?: any;
-  isCartCheckout?: boolean;
-  metadata?: any;
-  displayMode?: 'modal' | 'drawer';
-  calculateTotalsUrl?: string;
 }
 
 export function PaymentConfirmation({
@@ -74,25 +66,10 @@ export function PaymentConfirmation({
   taxCents,
   shippingCents,
   quantity,
-  // Legacy cart checkout props (unused in hosted button flow, but accepted for compatibility)
-  merchantId: _merchantId,
-  sessionMetadata: _sessionMetadata,
-  isCartCheckout: _isCartCheckout,
-  metadata: _metadata,
-  displayMode: _displayMode,
-  calculateTotalsUrl: _calculateTotalsUrl,
 }: PaymentConfirmationProps) {
-  const {
-    step,
-    setStep,
-    setPaymentResult,
-    createSession,
-    session,
-    isCreatingSession,
-  } = useCheckout();
   const { buttonConfig, apiBaseUrl } = useConfig();
-
   const { address: walletAddress, provider: walletProvider } = useWallet();
+  const { step, setStep, setPaymentResult, createSession, session, isCreatingSession } = useCheckout();
 
   const { address: userAddress, chainId: currentChainId } = useAccount();
   const { switchChain } = useSwitchChain();

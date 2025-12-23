@@ -1,6 +1,6 @@
 import { WalletProviderType } from "..";
 import { ButtonConfig, CartItem as CartItemAPI, ChainName } from "../lib/api";
-import { CartItem, CheckoutFormData, CheckoutState, ContactInfo, MneeCheckoutProps, PaymentMethod, PaymentResult, ShippingAddress, Theme } from "../types";
+import { CartItem, CheckoutFormData, CheckoutState, ContactInfo, MneeCheckoutProps, PaymentMethod, PaymentResult, ShippingAddress, StyleConfig, Theme } from "../types";
 
 export interface UserState {
   shipping?: ShippingAddress;
@@ -22,6 +22,7 @@ export interface UserSlice {
 
 export interface ConfigState {
   buttonConfig: ButtonConfig | null;
+  styling: StyleConfig | null;
   theme: Theme;
   resolvedTheme: 'light' | 'dark';
   isLoading: boolean;

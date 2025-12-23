@@ -4,7 +4,7 @@ import { CustomField, CheckoutFormData } from '../types';
  * Calculate the total additional cost from selected custom field options
  */
 export function calculateOptionsTotal(
-  customFields: CustomField[] | undefined,
+  customFields: CustomField[] | null,
   formData: CheckoutFormData
 ): number {
   if (!customFields || customFields.length === 0) {
@@ -54,7 +54,7 @@ export function calculateOptionsTotal(
  * Get a map of option field IDs to their individual prices
  */
 export function getOptionPrices(
-  customFields: CustomField[] | undefined,
+  customFields: CustomField[] | null,
   formData: CheckoutFormData
 ): Record<string, number> {
   if (!customFields || customFields.length === 0) {

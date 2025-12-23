@@ -4,6 +4,7 @@ import { ConfigSlice, ConfigState, StoreState } from '../types';
 
 const initialConfigState: ConfigState = {
   buttonConfig: null,
+  styling: null,
   theme: 'light',
   resolvedTheme: 'light',
   isLoading: true,
@@ -53,6 +54,7 @@ export const createConfigSlice: StateCreator<
         state.config.error = null;
         state.config.apiBaseUrl = apiBaseUrl;
         state.config.theme = theme;
+        state.config.styling = styling || null;
       });
 
       get().configActions.updateResolvedTheme();

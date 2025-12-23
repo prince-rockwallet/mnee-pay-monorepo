@@ -5,12 +5,13 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { DonationConfig, CustomField } from '../../types';
+import { DonationConfig } from '../../types';
 import { DynamicForm } from '../DynamicForm';
 import { formatCurrency } from '../../lib/currency';
 import { validateFields, validateEmail } from '../../lib/validation';
 import { toast } from 'sonner';
 import { useCheckout, useUser } from '../../store';
+import { useConfigCustomFields } from '../../store/custom';
 
 interface DonationCheckoutProps {
   config?: DonationConfig;
@@ -18,7 +19,6 @@ interface DonationCheckoutProps {
     name: string;
     priceUsdCents: number;
   };
-  customFields?: CustomField[];
   onProceedToPayment: () => void;
   collectEmail?: boolean;
   collectPhone?: boolean;
@@ -28,7 +28,6 @@ interface DonationCheckoutProps {
 export function DonationCheckout({
   config,
   product,
-  customFields,
   onProceedToPayment,
   collectEmail,
   collectPhone,
@@ -36,6 +35,7 @@ export function DonationCheckout({
 }: DonationCheckoutProps) {
   const { setEmail, setPhone, contact } = useUser();
   const { formData, updateFormData, setErrors, errors } = useCheckout();
+  const customFields = useConfigCustomFields();
 
   const defaultSuggestedAmounts = [5, 10, 25, 50];
   const suggestedAmounts = config?.suggestedAmounts || defaultSuggestedAmounts;

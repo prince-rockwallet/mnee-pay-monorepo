@@ -3,13 +3,14 @@ import { Lock, Unlock, Edit2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { PaywallConfig, CustomField } from '../../types';
+import { PaywallConfig } from '../../types';
 import { DynamicForm } from '../DynamicForm';
 import { formatCurrency } from '../../lib/currency';
 import { calculateOptionsTotal } from '../../lib/pricing';
 import { validateFields, validateEmail } from '../../lib/validation';
 import { toast } from 'sonner';
 import { useCheckout, useUser } from '../../store';
+import { useConfigCustomFields } from '../../store/custom';
 
 interface PaywallCheckoutProps {
   config?: PaywallConfig;
@@ -17,7 +18,6 @@ interface PaywallCheckoutProps {
     name: string;
     priceUsdCents: number;
   };
-  customFields?: CustomField[];
   onProceedToPayment: () => void;
   collectEmail?: boolean;
   collectPhone?: boolean;
@@ -28,7 +28,6 @@ interface PaywallCheckoutProps {
 export function PaywallCheckout({
   config,
   product,
-  customFields,
   onProceedToPayment,
   collectEmail,
   collectPhone,
@@ -37,6 +36,7 @@ export function PaywallCheckout({
 }: PaywallCheckoutProps) {
   const { formData, setErrors, errors } = useCheckout();
   const { contact, setEmail, setPhone } = useUser();
+  const customFields = useConfigCustomFields();
 
   // Determine if contact info (email/phone) is COMPLETE
   const isContactComplete = Boolean(

@@ -3,7 +3,7 @@ import { ShoppingBag, Minus, Plus, Edit2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { EcommerceConfig, CustomField } from '../../types';
+import { EcommerceConfig } from '../../types';
 import { DynamicForm } from '../DynamicForm';
 import { ShippingForm } from '../ShippingForm';
 import { formatCurrency } from '../../lib/currency';
@@ -11,6 +11,7 @@ import { calculateOptionsTotal, getOptionPrices } from '../../lib/pricing';
 import { validateFields, validateEmail, validateShippingAddress } from '../../lib/validation';
 import { toast } from 'sonner';
 import { useCart, useCheckout, useUser } from '../../store';
+import { useConfigCustomFields } from '../../store/custom';
 
 interface EcommerceCheckoutProps {
   config?: EcommerceConfig;
@@ -20,7 +21,6 @@ interface EcommerceCheckoutProps {
     description?: string;
     priceUsdCents: number;
   };
-  customFields?: CustomField[];
   onProceedToPayment: () => void;
   onClose?: () => void;
   onViewCart?: () => void;
@@ -36,7 +36,6 @@ interface EcommerceCheckoutProps {
 export function EcommerceCheckout({
   config,
   product,
-  customFields,
   onProceedToPayment,
   onClose,
   onViewCart,
@@ -49,6 +48,8 @@ export function EcommerceCheckout({
 }: EcommerceCheckoutProps) {
   const { formData, updateFormData, setErrors, errors } = useCheckout();
   const { contact, shipping, setEmail, setPhone } = useUser();
+  const customFields = useConfigCustomFields();
+
   const { addToCart, itemCount } = useCart();
   const quantity = formData.quantity || config?.quantity || 1;
   const isCartEnabled = config?.enableCart || false;
@@ -139,7 +140,7 @@ export function EcommerceCheckout({
       baseAmount,
       quantity,
       selectedOptions: formData.customFields,
-      customFieldsSchema: customFields,
+      customFieldsSchema: customFields || undefined,
       optionPrices,
       optionsTotal,
       // Store tax and shipping config per item so cart can calculate correctly

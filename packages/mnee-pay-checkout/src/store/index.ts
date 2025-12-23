@@ -9,7 +9,6 @@ import { createCheckoutSlice } from './slices/checkoutSlice';
 import { createCartSlice } from './slices/cartSlice';
 import { StoreState } from './types';
 
-
 export const useStore = create<StoreState>()(
   devtools(
     persist(

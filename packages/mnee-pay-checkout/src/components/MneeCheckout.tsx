@@ -14,7 +14,7 @@ import { FloatingCartButton } from './FloatingCartButton';
 import { CartView } from './CartView';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from './ui/sheet';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
-import { MneeCheckoutProps, CheckoutType, CustomField } from '../types';
+import { MneeCheckoutProps } from '../types';
 import { cn } from '../lib/utils';
 import { toast, Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -24,6 +24,7 @@ import { WalletStatusBadge } from './WalletStatusBadge';
 import { useCart, useCheckout, useConfig, useStore, useWallet } from '../store';
 import { useWalletSync } from '../hooks/useWalletSync';
 import { useStoreSync } from '../hooks/useStoreSync';
+import { useConfigCheckoutType, useConfigProduct, useConfigStyling } from '../store/custom';
 
 // Create a singleton QueryClient instance
 const queryClient = new QueryClient();
@@ -31,7 +32,6 @@ const queryClient = new QueryClient();
 function CheckoutContent(props: MneeCheckoutProps) {
   const {
     previewMode = false,
-    styling,
     triggerMode = 'button',
     open: controlledOpen,
     onOpenChange,
@@ -45,9 +45,16 @@ function CheckoutContent(props: MneeCheckoutProps) {
     onWalletConnect,
     onWalletDisconnect,
   } = props;
+  // Ecommerce store sync for multiple tab
   useStoreSync();
+
   const { initializeConfig, isLoading: configLoading, error: configError, buttonConfig, resolvedTheme } = useConfig();
-  console.log(buttonConfig);
+  const { step, setStep, formData } = useCheckout();
+  const { isConnected, address: walletAddress, setModalOpen: setWalletModalOpen } = useWallet();
+  const { items, getCartTotal, clearCart } = useCart();
+  const checkoutType = useConfigCheckoutType();
+  const product = useConfigProduct();
+  const resolvedStyling = useConfigStyling();
 
   // Init config
   useEffect(() => {
@@ -78,14 +85,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
 
-  const { step, setStep, formData } = useCheckout();
-  const { 
-    isConnected, 
-    address: walletAddress, 
-    setModalOpen: setWalletModalOpen,
-  } = useWallet();
-  const { items, getCartTotal, clearCart } = useCart();
-
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = useCallback((open: boolean) => {
     if (onOpenChange) {
@@ -94,63 +93,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
       setInternalOpen(open);
     }
   }, [onOpenChange]);
-
-  // Convert API button config to checkout type
-  const checkoutType: CheckoutType = useMemo(() => {
-    if (!buttonConfig) return 'paywall';
-    switch (buttonConfig.buttonType) {
-      case 'DONATION': return 'donation';
-      case 'ECOMMERCE': return 'ecommerce';
-      case 'PAYWALL':
-      default: return 'paywall';
-    }
-  }, [buttonConfig]);
-
-  // Convert API custom fields to our CustomField format
-  const customFields: CustomField[] | undefined = useMemo(() => {
-    if (!buttonConfig?.customFields) return undefined;
-    return buttonConfig.customFields.map(field => ({
-      id: field.id,
-      type: field.type as any,
-      label: field.label,
-      placeholder: field.placeholder,
-      defaultValue: field.defaultValue,
-      validation: field.required ? { required: true } : undefined,
-      options: field.options?.map(opt => ({
-        label: opt.label,
-        value: opt.value,
-        price: opt.priceModifierCents ? opt.priceModifierCents / 100 : undefined,
-      })),
-    }));
-  }, [buttonConfig]);
-
-  // Build product object from button config
-  const product = useMemo(() => {
-    if (!buttonConfig) return null;
-    return {
-      externalId: buttonConfig.id,
-      name: buttonConfig.productName || buttonConfig.name,
-      description: buttonConfig.description,
-      priceUsdCents: buttonConfig.priceUsdCents || 0,
-    };
-  }, [buttonConfig]);
-
-  // Build resolved styling - merge prop styling with API-fetched buttonConfig styling
-  // API config takes precedence for hosted buttons, prop styling is for SDK/preview overrides
-  const resolvedStyling = useMemo(() => {
-    if (!buttonConfig) return styling;
-    return {
-      ...styling,
-      primaryColor: styling?.primaryColor || buttonConfig.primaryColor,
-      buttonColor: styling?.buttonColor || buttonConfig.buttonColor,
-      buttonTextColor: styling?.buttonTextColor || buttonConfig.buttonTextColor,
-      borderRadius: styling?.borderRadius || buttonConfig.borderRadius as any,
-      buttonSize: styling?.buttonSize || buttonConfig.buttonSize as any,
-      fontFamily: styling?.fontFamily || buttonConfig.fontFamily,
-      customCSS: styling?.customCSS || buttonConfig.customCSS,
-      accentColor: styling?.accentColor || buttonConfig.accentColor,
-    };
-  }, [buttonConfig, styling]);
 
   const handleOpenModal = async () => {
     if (disabled || !buttonConfig) return;
@@ -369,7 +311,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
                 description: buttonConfig.description,
               }}
               product={product}
-              customFields={customFields}
               onProceedToPayment={handleProceedToPayment}
               collectEmail={buttonConfig.collectEmail}
               collectPhone={buttonConfig.collectPhone}
@@ -390,7 +331,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
                 buttonText: buttonConfig.buttonText
               }}
               product={product}
-              customFields={customFields}
               onProceedToPayment={handleProceedToPayment}
               collectEmail={buttonConfig.collectEmail}
               collectPhone={buttonConfig.collectPhone}
@@ -398,7 +338,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
             />
           );
         } else {
-          // Ecommerce
           return (
             <EcommerceCheckout
               config={{
@@ -409,7 +348,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
                 showQuantitySelector: buttonConfig.showQuantitySelector,
               }}
               product={product}
-              customFields={customFields}
               onProceedToPayment={handleProceedToPayment}
               onClose={handleCloseModalSilent}
               collectEmail={buttonConfig.collectEmail}
