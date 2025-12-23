@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 import { CheckoutState, CheckoutFormData, PaymentResult, WalletProvider, PaymentMethod } from '../types';
-import { useWallet } from './WalletContext';
 import { createButtonSession as createButtonSessionAPI, ChainName, ShippingAddress, CartItem } from '../lib/api';
 import { DEFAULT_PAYMENT_METHOD } from '../constants/payment-methods';
+import { useWallet } from '../store';
 
 interface CheckoutContextValue extends CheckoutState {
   updateFormData: (data: Partial<CheckoutFormData>) => void;

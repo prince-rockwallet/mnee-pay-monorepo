@@ -1,22 +1,5 @@
 import { StateCreator } from 'zustand';
-import { ShippingAddress, ContactInfo } from '../../types';
-import { StoreState } from '..';
-
-export interface UserInfo {
-  shipping?: ShippingAddress;
-  contact: ContactInfo;
-}
-
-export interface UserSlice {
-  user: {
-    userInfo: UserInfo;
-    setEmail: (email?: string) => void;
-    setPhone: (phone?: string) => void;
-    setShipping: (shipping: ShippingAddress) => void;
-    setContact: (contact: ContactInfo) => void;
-    clearUserInfo: () => void;
-  };
-}
+import { StoreState, UserInfo, UserSlice } from '../types';
 
 const initialUserInfo: UserInfo = {
   shipping: undefined,

@@ -1,25 +1,6 @@
 import { StateCreator } from 'zustand';
-import { Theme, MneeCheckoutProps } from '../../types';
 import { ButtonConfig, fetchButtonConfig } from '../../lib/api';
-import { StoreState } from '..';
-
-export interface ConfigState {
-  buttonConfig: ButtonConfig | null;
-  theme: Theme;
-  resolvedTheme: 'light' | 'dark';
-  isLoading: boolean;
-  error: string | null;
-  apiBaseUrl: string;
-}
-
-export interface ConfigSlice {
-  config: ConfigState & {
-    setTheme: (theme: Theme) => void;
-    updateResolvedTheme: () => void;
-    initializeConfig: (props: MneeCheckoutProps) => Promise<void>;
-    resetConfig: () => void;
-  };
-}
+import { ConfigSlice, ConfigState, StoreState } from '../types';
 
 const initialConfigState: ConfigState = {
   buttonConfig: null,

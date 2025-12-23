@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, PropsWithChildren } from 'react';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { YoursProvider } from 'yours-wallet-provider';
 import { CheckoutProvider, useCheckout } from '../contexts/CheckoutContext';
-import { WalletProvider, useWallet } from '../contexts/WalletContext';
 import { CartProvider, useCart } from '../contexts/CartContext';
 import { wagmiConfig } from '../lib/wagmi';
 import { CheckoutButton } from './CheckoutButton';
@@ -24,7 +23,8 @@ import { Loader2 } from 'lucide-react';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletSelectionModal } from './WalletSelectionModel';
 import { WalletStatusBadge } from './WalletStatusBadge';
-import { useConfig, useStore } from '../store';
+import { useConfig, useStore, useWallet } from '../store';
+import { useWalletSync } from '../hooks/useWalletSync';
 
 // Create a singleton QueryClient instance
 const queryClient = new QueryClient();
@@ -80,10 +80,12 @@ function CheckoutContent(props: MneeCheckoutProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
 
-  const [walletModalOpen, setWalletModalOpen] = useState(false);
-
-  const { step, setStep, walletAddress, formData } = useCheckout();
-  const wallet = useWallet();
+  const { step, setStep, formData } = useCheckout();
+  const { 
+    isConnected, 
+    address: walletAddress, 
+    setModalOpen: setWalletModalOpen,
+  } = useWallet();
   const { items, getCartTotal, clearCart } = useCart();
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -159,10 +161,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
   };
 
   const handleCloseModal = () => {
-    if (walletModalOpen) {
-      setWalletModalOpen(false);
-      return;
-    }
     setIsOpen(false);
     onCancel?.();
   };
@@ -172,17 +170,10 @@ function CheckoutContent(props: MneeCheckoutProps) {
     setIsOpen(false);
   };
   const handleSwitchWallet = useCallback(async () => {
-    if (wallet.isConnected) {
-      try {
-        await wallet.disconnect();
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    setTimeout(() => {
+    if (isConnected) {
       setWalletModalOpen(true);
-    }, 100);
-  }, [wallet.isConnected]);
+    }
+  }, [isConnected, setWalletModalOpen]);
 
   const handleProceedToPayment = async () => {
     // In preview mode, show a toast and don't actually proceed
@@ -191,7 +182,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
       return;
     }
 
-    if (!walletAddress && !wallet.isConnected) {
+    if (!walletAddress && !isConnected) {
       setWalletModalOpen(true);
       return;
     }
@@ -199,7 +190,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
   };
 
   const handleWalletConnectedFromModal = useCallback((address: string, provider: any) => {
-    setWalletModalOpen(false);
     onWalletConnect?.(address, provider);
   }, [onWalletConnect]);
 
@@ -472,10 +462,10 @@ function CheckoutContent(props: MneeCheckoutProps) {
         checkoutType={checkoutType}
         styling={resolvedStyling}
         theme={resolvedTheme}
-        preventReset={step === 'confirming' || step === 'processing' || walletModalOpen}
+        preventReset={step === 'confirming' || step === 'processing'}
       >
         {renderCheckoutContent()}
-        {wallet.isConnected && step !== 'complete' && step !== 'processing' && (
+        {isConnected && step !== 'complete' && step !== 'processing' && (
           <div className="mt-6">
             <WalletStatusBadge
               onSwitchWallet={handleSwitchWallet}
@@ -487,8 +477,6 @@ function CheckoutContent(props: MneeCheckoutProps) {
       </CheckoutModal>
 
       <WalletSelectionModal 
-        open={walletModalOpen}
-        onOpenChange={setWalletModalOpen}
         enabledWallets={enabledWallets}
         onWalletConnect={handleWalletConnectedFromModal}
         theme={resolvedTheme}
@@ -496,19 +484,15 @@ function CheckoutContent(props: MneeCheckoutProps) {
         onWalletDisconnect={onWalletDisconnect}
       />
 
-      {/* Floating Cart Button - only when cart is enabled */}
-      {buttonConfig?.enableCart && (
-        <FloatingCartButton
-          onClick={() => setCartModalOpen(true)}
-          position={buttonConfig.cartPosition || 'top-right'}
-          buttonColor={resolvedStyling?.buttonColor}
-          buttonTextColor={resolvedStyling?.buttonTextColor}
-        />
-      )}
-
-      {/* Cart Modal - respects cartDisplayMode setting */}
-      {buttonConfig?.enableCart && (
-        buttonConfig.cartDisplayMode === 'modal' ? (
+       {buttonConfig?.enableCart && (
+        <>
+          <FloatingCartButton
+            onClick={() => setCartModalOpen(true)}
+            position={buttonConfig.cartPosition || 'top-right'}
+            buttonColor={resolvedStyling?.buttonColor}
+            buttonTextColor={resolvedStyling?.buttonTextColor}
+          />
+          {buttonConfig.cartDisplayMode === 'modal' ? (
           <Dialog open={cartModalOpen} onOpenChange={setCartModalOpen}>
             <DialogContent className={cn(resolvedTheme, 'sm:max-w-lg max-h-[90vh] overflow-y-auto')}>
               <DialogTitle className="text-foreground">Your Cart</DialogTitle>
@@ -524,7 +508,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
                   }
                   setCartModalOpen(false);
                   setIsOpen(true);
-                  if (!walletAddress && !wallet.isConnected) {
+                  if (!walletAddress && !isConnected) {
                     setWalletModalOpen(true);
                   } else {
                     setStep('confirming');
@@ -536,7 +520,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
               />
             </DialogContent>
           </Dialog>
-        ) : (
+          ) : (
           <Sheet open={cartModalOpen} onOpenChange={setCartModalOpen}>
             <SheetContent side="right" className={cn(resolvedTheme, 'w-full sm:max-w-lg')}>
               <SheetTitle className="text-foreground">Your Cart</SheetTitle>
@@ -552,7 +536,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
                   }
                   setCartModalOpen(false);
                   setIsOpen(true);
-                  if (!walletAddress && !wallet.isConnected) {
+                  if (!walletAddress && !isConnected) {
                     setWalletModalOpen(true);
                   } else {
                     setStep('confirming');
@@ -564,10 +548,16 @@ function CheckoutContent(props: MneeCheckoutProps) {
               />
             </SheetContent>
           </Sheet>
-        )
+          )}
+        </>
       )}
     </div>
   );
+}
+
+function WalletSyncWrapper(props: PropsWithChildren) {
+  useWalletSync();
+  return <>{props.children}</>;
 }
 
 // Wrapper with CheckoutProvider only (use when already inside MneeSharedProviders)
@@ -589,12 +579,12 @@ export function MneeSharedProviders({ children }: { children: React.ReactNode })
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
           <YoursProvider>
-            <WalletProvider>
+            <WalletSyncWrapper>
               <CartProvider>
                   {children}
                   <Toaster position='top-center' richColors />
               </CartProvider>
-            </WalletProvider>
+            </WalletSyncWrapper>
           </YoursProvider>
         </RainbowKitProvider>
       </QueryClientProvider>

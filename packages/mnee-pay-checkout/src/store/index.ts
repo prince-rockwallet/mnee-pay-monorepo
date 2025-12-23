@@ -2,10 +2,11 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { createUserSlice, UserSlice } from './slices/userInfoSlice';
-import { ConfigSlice, createConfigSlice } from './slices/configSlice';
+import { createUserSlice } from './slices/userInfoSlice';
+import { createConfigSlice } from './slices/configSlice';
+import { createWalletSlice } from './slices/walletSlice';
+import { StoreState } from './types';
 
-export type StoreState = UserSlice & ConfigSlice; 
 
 export const useStore = create<StoreState>()(
   devtools(
@@ -13,11 +14,19 @@ export const useStore = create<StoreState>()(
       immer((...a) => ({
         ...createUserSlice(...a),
         ...createConfigSlice(...a),
+        ...createWalletSlice(...a),
       })),
       {
         name: 'mnee-checkout-storage',
         storage: createJSONStorage(() => localStorage),
-        partialize: (state) => ({ user: state.user }),
+        partialize: (state) => ({ 
+          user: state.user,
+          wallet: { 
+            address: state.wallet.address, 
+            provider: state.wallet.provider,
+            isConnected: state.wallet.isConnected 
+          }
+        }),
       }
     ),
     { 
@@ -37,4 +46,11 @@ export const useConfig = () => {
 
 export const useResolvedTheme = () => {
   return useStore(useShallow((state) => state.config.resolvedTheme));
+};
+
+export const useWallet = () => {
+  return useStore(useShallow((state) => ({
+    ...state.wallet,        
+    ...state.walletActions 
+  })));
 };

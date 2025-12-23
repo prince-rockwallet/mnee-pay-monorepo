@@ -2,20 +2,21 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dial
 import { WalletConnection } from './WalletConnection';
 import { WalletProvider } from '../types';
 import { cn } from '../lib/utils';
+import { useWallet } from '../store';
 
 interface WalletSelectionModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   enabledWallets?: WalletProvider[];
-  onWalletConnect: (address: string, provider: WalletProvider) => void;
+  onWalletConnect?: (address: string, provider: WalletProvider) => void;
   theme?: 'light' | 'dark';
   styling?: any;
   onWalletDisconnect?: () => void;
 }
 
 export function WalletSelectionModal({
-  open,
-  onOpenChange,
+  open: propOpen,
+  onOpenChange: propOnOpenChange,
   enabledWallets,
   onWalletConnect,
   theme = 'light',
@@ -23,10 +24,21 @@ export function WalletSelectionModal({
   onWalletDisconnect
 }: WalletSelectionModalProps) {
   
+  const { isModalOpen, setModalOpen } = useWallet();
+
+  const isOpen = propOpen !== undefined ? propOpen : isModalOpen;
+  const handleOpenChange = (val: boolean) => {
+    if (propOnOpenChange) {
+      propOnOpenChange(val);
+    } else {
+      setModalOpen(val);
+    }
+  };
+  
   return (
     <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
+      open={isOpen}
+      onOpenChange={handleOpenChange}
       modal={false}
     >
       <DialogContent 
@@ -50,7 +62,7 @@ export function WalletSelectionModal({
             enabledWallets={enabledWallets}
             forceSelection={true}
             onConnect={(address, provider) => {
-              onWalletConnect(address, provider);
+              onWalletConnect?.(address, provider);
             }}
             onDisconnect={onWalletDisconnect}
           />

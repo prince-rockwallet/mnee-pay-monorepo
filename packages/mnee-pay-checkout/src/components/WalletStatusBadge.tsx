@@ -1,6 +1,6 @@
 import { Wallet } from 'lucide-react';
-import { useWallet } from '../contexts/WalletContext';
 import { StyleConfig } from '../types';
+import { useWallet } from '../store';
 
 interface WalletStatusBadgeProps {
   onSwitchWallet?: () => void;

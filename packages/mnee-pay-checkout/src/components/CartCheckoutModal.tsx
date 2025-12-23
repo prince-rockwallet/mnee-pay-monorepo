@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { CheckoutProvider, useCheckout } from '../contexts/CheckoutContext';
 import { useCart } from '../contexts/CartContext';
-import { useWallet } from '../contexts/WalletContext';
 import { WalletConnection } from './WalletConnection';
 import { PaymentConfirmation } from './PaymentConfirmation';
 import { WalletStatusBadge } from './WalletStatusBadge';
@@ -9,6 +8,7 @@ import { CartView } from './CartView';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from './ui/sheet';
 import { CheckoutMetadata, PaymentResult } from '../types';
+import { useWallet } from '../store';
 
 interface CartCheckoutModalProps {
   open: boolean;

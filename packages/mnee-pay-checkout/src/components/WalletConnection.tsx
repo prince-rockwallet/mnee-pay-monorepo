@@ -2,7 +2,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "./ui/button";
 import { WalletProvider } from "../types";
-import { useWallet } from "../contexts/WalletContext";
+import { useWallet } from "../store";
 import { useEffect, useRef } from "react";
 import yoursLogo from "../assets/yours-logo.png";
 
@@ -19,7 +19,14 @@ export function WalletConnection({
   onDisconnect,
   forceSelection = false,
 }: WalletConnectionProps) {
-  const { isConnected, isConnecting, address, provider, disconnect, connectYours } = useWallet();
+  const { 
+    isConnected, 
+    isConnecting, 
+    address, 
+    provider, 
+    disconnect, 
+    connectYours 
+  } = useWallet();
 
   // Track if we've already called onConnect for this connection
   const hasCalledOnConnect = useRef(false);
