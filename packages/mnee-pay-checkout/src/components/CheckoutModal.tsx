@@ -1,4 +1,4 @@
-import { useEffect, useId } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogTitle, DialogDescription, DialogOverlay, DialogPortal } from './ui/dialog';
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -7,13 +7,13 @@ import { CheckoutType, StyleConfig } from '../types';
 import { cn } from '../lib/utils';
 import { useCheckout } from '../store';
 
-interface CheckoutModalProps {
+interface CheckoutModalProps extends PropsWithChildren {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   checkoutType: CheckoutType;
   styling?: StyleConfig;
   theme: 'light' | 'dark';
-  children: React.ReactNode;
+  scopeId: string;
   preventReset?: boolean; // Don't reset checkout state when modal closes
 }
 
@@ -49,10 +49,10 @@ export function CheckoutModal({
   styling,
   theme,
   children,
+  scopeId,
   preventReset = false,
 }: CheckoutModalProps) {
   const { resetCheckout } = useCheckout();
-  const customCSSId = useId();
 
   useEffect(() => {
     if (!open) {
@@ -83,33 +83,13 @@ export function CheckoutModal({
     };
   }, [open]);
 
-  // Inject custom CSS when provided
-  useEffect(() => {
-    if (!styling?.customCSS) return;
-
-    // Create or update style element
-    const styleId = `mnee-custom-css-${customCSSId.replace(/:/g, '-')}`;
-    let styleEl = document.getElementById(styleId) as HTMLStyleElement;
-
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = styleId;
-      document.head.appendChild(styleEl);
-    }
-
-    styleEl.textContent = styling.customCSS;
-
-    return () => {
-      styleEl?.remove();
-    };
-  }, [styling?.customCSS, customCSSId]);
-
   // Simplified border radius - 'square' = 0, 'rounded' (default) = 0.5rem
   const borderRadiusValue = styling?.borderRadius === 'square' ? '0' : '0.5rem';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogPortal>
+        <div id={scopeId} style={{ display: 'contents' }}>
         {/* Match RainbowKit's overlay styling (rgba(0,0,0,0.3) with no blur) throughout */}
         <DialogOverlay
           className="fixed inset-0 z-50 bg-black/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
@@ -162,6 +142,7 @@ export function CheckoutModal({
             </AnimatePresence>
           </div>
         </DialogPrimitive.Content>
+        </div>
       </DialogPortal>
     </Dialog>
   );

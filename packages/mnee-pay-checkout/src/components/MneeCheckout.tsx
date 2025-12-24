@@ -25,6 +25,7 @@ import { useCart, useCheckout, useConfig, useStore, useWallet } from '../store';
 import { useWalletSync } from '../hooks/useWalletSync';
 import { useStoreSync } from '../hooks/useStoreSync';
 import { useConfigCheckoutType, useConfigProduct, useConfigStyling } from '../store/custom';
+import { processScopedStyles } from '../lib/styleScope';
 
 // Create a singleton QueryClient instance
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const queryClient = new QueryClient();
 function CheckoutContent(props: MneeCheckoutProps) {
   const {
     previewMode = false,
+    buttonId = 'preview',
     triggerMode = 'button',
     open: controlledOpen,
     onOpenChange,
@@ -48,6 +50,8 @@ function CheckoutContent(props: MneeCheckoutProps) {
   // Ecommerce store sync for multiple tab
   useStoreSync();
 
+  const scopeId = useMemo(() => `mnee-scope-${buttonId.replace(/[^a-zA-Z0-9-]/g, '')}`, [buttonId]);
+
   const { initializeConfig, isLoading: configLoading, error: configError, buttonConfig, resolvedTheme } = useConfig();
   const { step, setStep, formData } = useCheckout();
   const { isConnected, address: walletAddress, setModalOpen: setWalletModalOpen } = useWallet();
@@ -60,6 +64,29 @@ function CheckoutContent(props: MneeCheckoutProps) {
   useEffect(() => {
     initializeConfig(props);
   }, [props.buttonId, props.config, props.theme, initializeConfig, props.apiBaseUrl, props.showConfetti, props.styling]);
+
+  useEffect(() => {
+    if (!resolvedStyling?.customCSS) return;
+
+    const compiledCSS = processScopedStyles(scopeId, resolvedStyling.customCSS);
+    
+    if (!compiledCSS) return;
+
+    const styleTagId = `mnee-style-${scopeId}`;
+    let styleEl = document.getElementById(styleTagId) as HTMLStyleElement;
+
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleTagId;
+      document.head.appendChild(styleEl);
+    }
+
+    styleEl.textContent = compiledCSS;
+
+    return () => {
+      styleEl?.remove();
+    };
+  }, [resolvedStyling?.customCSS, scopeId]);
 
   // Theme listener
   useEffect(() => {
@@ -364,9 +391,11 @@ function CheckoutContent(props: MneeCheckoutProps) {
 
   return (
     <div
+      id={scopeId}
       className={cn(
         resolvedTheme,
         className,
+        "mnee-checkout-root",
         (resolvedStyling?.buttonColor || resolvedStyling?.buttonTextColor) && 'mnee-custom-button-styles'
       )}
       style={{
@@ -393,6 +422,7 @@ function CheckoutContent(props: MneeCheckoutProps) {
         styling={resolvedStyling}
         theme={resolvedTheme}
         preventReset={step === 'confirming' || step === 'processing'}
+        scopeId={scopeId}
       >
         {renderCheckoutContent()}
         {isConnected && step !== 'complete' && step !== 'processing' && (
