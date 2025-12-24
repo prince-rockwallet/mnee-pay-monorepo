@@ -16,7 +16,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from './ui/sheet';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 import { MneeCheckoutProps } from '../types';
 import { cn } from '../lib/utils';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import '@rainbow-me/rainbowkit/styles.css';
 import { WalletSelectionModal } from './WalletSelectionModel';
@@ -538,8 +538,7 @@ export function MneeSharedProviders({ children }: { children: React.ReactNode })
         <RainbowKitProvider>
           <YoursProvider>
             <WalletSyncWrapper>
-                {children}
-                <Toaster position='top-center' richColors />
+              {children}
             </WalletSyncWrapper>
           </YoursProvider>
         </RainbowKitProvider>

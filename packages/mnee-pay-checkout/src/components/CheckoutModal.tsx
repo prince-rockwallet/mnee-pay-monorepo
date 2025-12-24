@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { CheckoutType, StyleConfig } from '../types';
 import { cn } from '../lib/utils';
 import { useCheckout } from '../store';
+import { Toaster } from 'sonner';
 
 interface CheckoutModalProps extends PropsWithChildren {
   open: boolean;
@@ -90,6 +91,7 @@ export function CheckoutModal({
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogPortal>
         <div id={scopeId} style={{ display: 'contents' }}>
+        <Toaster position='top-center' richColors duration={1000000000} />
         {/* Match RainbowKit's overlay styling (rgba(0,0,0,0.3) with no blur) throughout */}
         <DialogOverlay
           className="fixed inset-0 z-50 bg-black/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"

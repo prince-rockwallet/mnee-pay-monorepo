@@ -1,7 +1,7 @@
 {
   "name": "@mnee-pay/checkout",
   "private": false,
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "main": "./dist/mnee-checkout.cjs.js",
   "module": "./dist/mnee-checkout.es.js",
