@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 import { ButtonConfig, fetchButtonConfig } from '../../lib/api';
 import { ConfigSlice, ConfigState, StoreState } from '../types';
+import { Theme } from '../../types';
 
 const initialConfigState: ConfigState = {
   buttonConfig: null,
@@ -53,11 +54,8 @@ export const createConfigSlice: StateCreator<
         state.config.isLoading = true;
         state.config.error = null;
         state.config.apiBaseUrl = apiBaseUrl;
-        state.config.theme = theme;
         state.config.styling = styling || null;
       });
-
-      get().configActions.updateResolvedTheme();
 
       if (configOverride) {
         const mockConfig: ButtonConfig = {
@@ -79,7 +77,10 @@ export const createConfigSlice: StateCreator<
         set((state) => {
           state.config.buttonConfig = mockConfig;
           state.config.isLoading = false;
+          state.config.theme = theme;
         });
+
+        get().configActions.updateResolvedTheme();
         return;
       }
 
@@ -87,7 +88,10 @@ export const createConfigSlice: StateCreator<
         set((state) => {
           state.config.error = 'Button ID or configuration is required';
           state.config.isLoading = false;
+          state.config.theme = theme;
         });
+
+        get().configActions.updateResolvedTheme();
         return;
       }
 
@@ -96,12 +100,15 @@ export const createConfigSlice: StateCreator<
         set((state) => {
           state.config.buttonConfig = config;
           state.config.isLoading = false;
+          state.config.theme = config.theme as Theme || theme;
         });
       } catch (err: any) {
         set((state) => {
           state.config.error = err.message || 'Failed to load configuration';
           state.config.isLoading = false;
         });
+      } finally {
+        get().configActions.updateResolvedTheme();
       }
     },
 

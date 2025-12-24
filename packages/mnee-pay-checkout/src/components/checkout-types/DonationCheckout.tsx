@@ -221,7 +221,9 @@ export function DonationCheckout({
         {/* Custom Amount */}
         {allowCustomAmount && (
           <div className="space-y-2">
-            <Label htmlFor="customAmount">Or enter custom amount</Label>
+            <Label htmlFor="customAmount">
+              {suggestedAmounts?.length > 0 ? 'Or enter custom amount' : 'Enter donation amount'}
+            </Label>
             <div className="relative">
               <Input
                 id="customAmount"
