@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 
 export const DonationFlow: Story = {
   args: {
-    buttonId: 'd77f2a7b-9d7a-4439-a7b1-d1e688369209',
+    buttonId: '',
     apiBaseUrl: 'http://localhost:3001',
   },
 };
