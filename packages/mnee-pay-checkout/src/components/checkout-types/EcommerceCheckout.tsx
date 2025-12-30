@@ -120,7 +120,10 @@ export function EcommerceCheckout({
     // If there are errors, set them and show toast
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      toast.error('Please select all required options');
+      toast.error('Please select all required options', {
+        id: 'cart-options-error',
+        duration: 2000,
+      });
       return;
     }
 
@@ -151,7 +154,10 @@ export function EcommerceCheckout({
     });
 
     // Show success toast
-    toast.success(`Added ${quantity} ${config?.productName || 'item'}(s) to cart`);
+    toast.success(`Added ${quantity} ${config?.productName || 'item'}(s) to cart`, {
+      id: 'cart-add-success',
+      duration: 2000,
+    });
 
     // Reset quantity and custom fields for next add
     updateFormData({
@@ -198,7 +204,10 @@ export function EcommerceCheckout({
     // If there are errors, set them and show toast
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      toast.error('Please fill in all required fields');
+      toast.error('Please fill in all required fields', {
+        id: 'cart-options-error',
+        duration: 2000,
+      });
       return;
     }
 

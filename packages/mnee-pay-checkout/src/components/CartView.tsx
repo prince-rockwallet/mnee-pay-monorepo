@@ -109,7 +109,10 @@ export function CartView({
     // If there are errors, set them and show toast
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      toast.error('Please fill in all required fields');
+      toast.error('Please fill in all required fields', {
+        id: 'checkout-validation-error',
+        duration: 2000,
+      });
       return;
     }
 

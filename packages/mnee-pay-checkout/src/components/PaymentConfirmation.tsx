@@ -135,7 +135,10 @@ export function PaymentConfirmation({
             quantity
           );
         } catch (error: any) {
-          toast.error(error?.message || "Failed to create checkout session");
+          toast.error(error?.message || "Failed to create checkout session", {
+            id: 'checkout-session-error',
+            duration: 2000,
+          });
           console.error("[PaymentConfirmation] Failed to create session:", error);
           setErrorMessage(error.message || "Failed to create checkout session");
           setStep("error");
@@ -185,7 +188,10 @@ export function PaymentConfirmation({
       setIsPreparingPayment(false);
       setStep("confirming");
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to prepare payment');
+      toast.error(error?.message || 'Failed to prepare payment', {
+        id: 'payment-preparation-error',
+        duration: 2000,
+      });
       console.error("Payment preparation failed:", error);
       setErrorMessage(error.message || "Failed to prepare payment");
       setIsPreparingPayment(false);
