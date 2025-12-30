@@ -98,17 +98,26 @@ export function DonationCheckout({
 
     // Validate amount
     if (!finalAmount || finalAmount <= 0) {
-      toast.error('Please select or enter a donation amount');
+      toast.error('Please select or enter a donation amount', {
+        id: 'donation-amount-error',
+        duration: 2000,
+      });
       return;
     }
 
     if (config?.minAmount && finalAmount < config.minAmount) {
-      toast.error(`Minimum donation amount is ${formatCurrency(config.minAmount, 'USD')}`);
+      toast.error(`Minimum donation amount is ${formatCurrency(config.minAmount, 'USD')}`, {
+        id: 'donation-min-amount-error',
+        duration: 2000,
+      });
       return;
     }
 
     if (config?.maxAmount && finalAmount > config.maxAmount) {
-      toast.error(`Maximum donation amount is ${formatCurrency(config.maxAmount, 'USD')}`);
+      toast.error(`Maximum donation amount is ${formatCurrency(config.maxAmount, 'USD')}`, {
+        id: 'donation-max-amount-error',
+        duration: 2000,
+      });
       return;
     }
 
@@ -136,7 +145,10 @@ export function DonationCheckout({
     // If there are errors, set them and show toast
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      toast.error('Please fill in all required fields');
+      toast.error('Please fill in all required fields', {
+        id: 'donation-form-error',
+        duration: 2000,
+      });
       return;
     }
 

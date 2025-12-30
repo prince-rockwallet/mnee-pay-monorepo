@@ -102,7 +102,10 @@ export function PaywallCheckout({
     // If there are errors, set them and show toast
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      toast.error('Please fill in all required fields');
+      toast.error('Please fill in all required fields', {
+        id: 'paywall-form-error',
+        duration: 2000,
+      });
       return;
     }
 

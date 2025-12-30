@@ -145,7 +145,10 @@ function CheckoutContent(props: MneeCheckoutProps) {
   const handleProceedToPayment = async () => {
     // In preview mode, show a toast and don't actually proceed
     if (previewMode) {
-      toast.info('Preview Mode - Payment processing is disabled');
+      toast.info('Preview Mode - Payment processing is disabled', {
+        id: 'preview-mode-toast',
+        duration: 2000,
+      });
       return;
     }
 
@@ -463,7 +466,10 @@ function CheckoutContent(props: MneeCheckoutProps) {
                 onContinueShopping={() => setCartModalOpen(false)}
                 onProceedToCheckout={() => {
                   if (previewMode) {
-                    toast.info('Preview Mode - Payment processing is disabled');
+                    toast.info('Preview Mode - Payment processing is disabled', {
+                      id: 'preview-mode-toast',
+                      duration: 2000,
+                    });
                     return;
                   }
                   setCartModalOpen(false);
@@ -491,7 +497,10 @@ function CheckoutContent(props: MneeCheckoutProps) {
                 onContinueShopping={() => setCartModalOpen(false)}
                 onProceedToCheckout={() => {
                   if (previewMode) {
-                    toast.info('Preview Mode - Payment processing is disabled');
+                    toast.info('Preview Mode - Payment processing is disabled', {
+                      id: 'preview-mode-toast',
+                      duration: 2000,
+                    });
                     return;
                   }
                   setCartModalOpen(false);
